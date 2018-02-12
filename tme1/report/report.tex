@@ -69,14 +69,17 @@
 \label{mae_ram}
 \end{figure}
 
-\begin{table}[H]
+\begin{table}[!htb]
 \centering
 \begingroup
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{ | c | l | }
+\begin{minipage}{.5\linewidth}
+\centering
+\caption{Fonctions de transition de la MAE de SimpleRam}
+\begin{tabular}{ | l | l | }
 \hline
-Fonction    &   Transition  \\
+Nom    &   Transition  \\
 \hline
 \texttt{A}  &   \tt{SEL.ADR\_OK.$\overline{\tt{READ}}$.DELAY                     }\\
 \texttt{B}  &   \tt{SEL.ADR\_OK.$\overline{\tt{READ}}$.$\overline{\tt{DELAY}}$        }\\
@@ -101,6 +104,10 @@ Fonction    &   Transition  \\
 \texttt{T}  &   \tt{$\overline{\tt{SEL}}$                                        }\\
 \hline
 \end{tabular}
+\end{minipage}%
+\begin{minipage}{.5\linewidth}
+\centering
+\caption{Valeurs de sortie de la MAE de SimpleRam}
 \begin{tabular}{| l | l | l | l | l |}
 \hline
                     & \tt{ACK\_EN}      & \tt{ACK\_VALUE}   & \tt{DT\_EN} & \tt{MEM\_CMD}   \\
@@ -113,10 +120,13 @@ Fonction    &   Transition  \\
 \tt{ERROR}          & \tt{1}            & \tt{ERROR}        & \tt{0}      & \tt{NOPE}         \\
 \hline
 \end{tabular}
+\end{minipage}
 \endgroup
-\caption{Fonctions de transition et valers de sortie de la MAE du composant RAM}
-\label{standard}
 \end{table}
+
+
+
+
 
 
 
@@ -134,55 +144,52 @@ Fonction    &   Transition  \\
 \begingroup
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{ | c | l | }
+\begin{minipage}{.2\linewidth}
+\centering
+\caption{Fonctions de transition de SimpleMaster}
+\begin{tabular}{ | l | l | }
 \hline
-Fonction    &   Transition  \\
+Nom    &   Transition  \\
 \hline
 \tt{A}  & \tt{1} \\
-\tt{B'} & \tt{$\overline{GNT}$} \\
+\tt{B'} & \tt{$\overline{\tt{GNT}}$} \\
 \tt{B}  & \tt{GNT} \\
 \hline
 \tt{C}  & \tt{1} \\
 \tt{D'} & \tt{RDY} \\
-\tt{D}  & \tt{$\overline{RDY}$} \\
+\tt{D}  & \tt{$\overline{\tt{RDY}}$} \\
 \tt{E}  & \tt{RDY} \\
-\tt{E'} & \tt{$\overline{RDY}$} \\
+\tt{E'} & \tt{$\overline{\tt{RDY}}$} \\
 \tt{F}  & \tt{RDY} \\
-\tt{F'} & \tt{$\overline{RDY}$} \\
+\tt{F'} & \tt{$\overline{\tt{RDY}}$} \\
 \tt{G}  & \tt{RDY} \\
-\tt{G'} & \tt{$\overline{RDY}$} \\
+\tt{G'} & \tt{$\overline{\tt{RDY}}$} \\
 \hline
-\tt{H'} & \tt{$\overline{GNT}$} \\
+\tt{H'} & \tt{$\overline{\tt{GNT}}$} \\
 \tt{H}  & \tt{GNT} \\
 \tt{I}  & \tt{1} \\
-\tt{J}  & \tt{$\overline{RDY}$} \\
+\tt{J}  & \tt{$\overline{\tt{RDY}}$} \\
 \tt{K}  & \tt{RDY.LAST} \\
-\tt{L}  & \tt{RDY.$\overline{LAST}$} \\
+\tt{L}  & \tt{RDY.$\overline{\tt{LAST}}$} \\
 \hline
-\tt{M'} & \tt{$\overline{GNT}$} \\
+\tt{M'} & \tt{$\overline{\tt{GNT}}$} \\
 \tt{M}  & \tt{GNT} \\
 \tt{N}  & \tt{1} \\
-\tt{O}  & \tt{$\overline{RDY}$} \\
-\tt{P}  & \tt{RDY.$\overline{NUL}$} \\
+\tt{O}  & \tt{$\overline{\tt{RDY}}$} \\
+\tt{P}  & \tt{RDY.$\overline{\tt{NUL}}$} \\
 \tt{Q}  & \tt{RDY.NUL} \\
 \hline
-\tt{R'} & \tt{$\overline{GNT}$} \\
+\tt{R'} & \tt{$\overline{\tt{GNT}}$} \\
 \tt{R}  & \tt{GNT} \\
 \tt{S}  & \tt{1} \\
-\tt{T'} & \tt{$\overline{RDY}$} \\
+\tt{T'} & \tt{$\overline{\tt{RDY}}$} \\
 \tt{T}  & \tt{RDY} \\
 \hline
 \end{tabular}
-\endgroup
-\caption{Expression des fonctions de transitions de la MAE du composant Master}
-\label{standard}
-\end{table}
-
-\begin{table}[H]
+\end{minipage}
+\begin{minipage}{.6\linewidth}
 \centering
-\begingroup
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.1}
+\caption{Valeurs de sortie de SimpleMaster}
 \begin{tabular}{|l|l|l|l|l|l|l|}
 \hline
                   & \tt{REQ}       & \tt{CMD\_EN}   & \tt{ADR\_VALUE}         & \tt{READ\_VALUE}   & \tt{LOCK\_VAL} & \tt{DT\_EN}    \\
@@ -205,13 +212,10 @@ Fonction    &   Transition  \\
 \tt{BUF\_DT}      & \tt{0}         & \tt{0}         & \tt{X}                  & \tt{X}             & \tt{X}         & \tt{0}         \\
 \hline
 \end{tabular}
+\end{minipage}
 \endgroup
-\caption{Valeurs des signaux de sortie de la MAE du composant Master}
 \label{standard}
 \end{table}
-
-
-
 
 \begin{enumerate}
 \item \textbf{Modélisation}  : Cela consiste en la description d'un modèle du processeur,
