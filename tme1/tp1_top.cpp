@@ -110,8 +110,7 @@ int _main (int argc, char *argv[])
   segtable.setMSBnumber(4);
   
   segtable.addSegment("seg_ram" , SEG_RAM_BASE, 0x00000010, 0, false);
- 
-TO BE COMPLETED : segment associated to the TTY
+  segtable.addSegment("seg_tty" , SEG_TTY_BASE, 0x00000010, 1, false);
 
 /////////////////////////////////////////////////////////
 //	INSTANCIATED  COMPONENTS
@@ -120,9 +119,9 @@ TO BE COMPLETED : segment associated to the TTY
   Loader			loader	("string_file@0x10000000:D");
 
   PibusSegBcu			bcu	("bcu", segtable, 1 , 2, 100);
-  PibusSimpleMaster		master	("master", TO BE COMPLETED);
-  PibusSimpleRam		ram	("ram"  , TO BE COMPLETED);
-  PibusMultiTty  		tty 	("tty"  ,  1, segtable, 1);
+  PibusSimpleMaster		master	("master", SEG_RAM_BASE, SEG_TTY_BASE);
+  PibusSimpleRam		ram	("ram"  , 0, segtable, ram_latency, loader);
+  PibusMultiTty  		tty 	("tty"  , 1, segtable, 1);
 
   std::cout << std::endl;
 
@@ -153,8 +152,28 @@ TO BE COMPLETED : segment associated to the TTY
   tty.p_tout			(signal_pi_tout);
   tty.p_irq_put[0]		(signal_irq);
   tty.p_irq_get[0]		(signal_irq);
-  
-TO BE COMPLETED : connect the ram (PibusSimpleRam) & master (PibusSimpleMaster) components
+
+  master.p_ck                   (signal_ck);
+  master.p_resetn               (signal_resetn);
+  master.p_gnt                  (signal_gnt_master);
+  master.p_req                  (signal_req_master);
+  master.p_a                    (signal_pi_a);
+  master.p_opc			(signal_pi_opc);
+  master.p_read			(signal_pi_read);
+  master.p_lock			(signal_pi_lock);
+  master.p_d			(signal_pi_d);
+  master.p_ack			(signal_pi_ack);
+  master.p_tout			(signal_pi_tout);
+
+  ram.p_ck			(signal_ck);
+  ram.p_resetn			(signal_resetn);
+  ram.p_sel 			(signal_sel_ram);
+  ram.p_a			(signal_pi_a);
+  ram.p_read			(signal_pi_read);
+  ram.p_opc			(signal_pi_opc);
+  ram.p_ack			(signal_pi_ack);
+  ram.p_d			(signal_pi_d);
+  ram.p_tout			(signal_pi_tout);
   
 //////////////////////////////////////////////
 //     simulation loop
