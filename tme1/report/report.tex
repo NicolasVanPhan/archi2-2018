@@ -62,8 +62,6 @@
 
 \section{Automate du composant PibusSimpleRam}
 
-\subsection{Machine à états du composant}
-
 \begin{figure}[H]
 \includegraphics[width=0.75\textwidth]{pics/mae_ram.png}
 \centering
@@ -103,16 +101,6 @@ Fonction    &   Transition  \\
 \texttt{T}  &   \tt{$\overline{\tt{SEL}}$                                        }\\
 \hline
 \end{tabular}
-\endgroup
-\caption{Expression des fonctions de transitions de la MAE du composant RAM}
-\label{standard}
-\end{table}
-
-\begin{table}[H]
-\centering
-\begingroup
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.1}
 \begin{tabular}{| l | l | l | l | l |}
 \hline
                     & \tt{ACK\_EN}      & \tt{ACK\_VALUE}   & \tt{DT\_EN} & \tt{MEM\_CMD}   \\
@@ -126,12 +114,101 @@ Fonction    &   Transition  \\
 \hline
 \end{tabular}
 \endgroup
-\caption{Expression des fonctions de transitions de la MAE du composant RAM}
+\caption{Fonctions de transition et valers de sortie de la MAE du composant RAM}
 \label{standard}
 \end{table}
 
 
 
+\section{Automate du composant PibusSimpleMaster}
+
+\begin{figure}[H]
+\includegraphics[width=0.75\textwidth]{pics/mae_master.png}
+\centering
+\caption{Graphe de la MAE du composant Master}
+\label{mae_ram}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{ | c | l | }
+\hline
+Fonction    &   Transition  \\
+\hline
+\tt{A}  & \tt{1} \\
+\tt{B'} & \tt{$\overline{GNT}$} \\
+\tt{B}  & \tt{GNT} \\
+\hline
+\tt{C}  & \tt{1} \\
+\tt{D'} & \tt{RDY} \\
+\tt{D}  & \tt{$\overline{RDY}$} \\
+\tt{E}  & \tt{RDY} \\
+\tt{E'} & \tt{$\overline{RDY}$} \\
+\tt{F}  & \tt{RDY} \\
+\tt{F'} & \tt{$\overline{RDY}$} \\
+\tt{G}  & \tt{RDY} \\
+\tt{G'} & \tt{$\overline{RDY}$} \\
+\hline
+\tt{H'} & \tt{$\overline{GNT}$} \\
+\tt{H}  & \tt{GNT} \\
+\tt{I}  & \tt{1} \\
+\tt{J}  & \tt{$\overline{RDY}$} \\
+\tt{K}  & \tt{RDY.LAST} \\
+\tt{L}  & \tt{RDY.$\overline{LAST}$} \\
+\hline
+\tt{M'} & \tt{$\overline{GNT}$} \\
+\tt{M}  & \tt{GNT} \\
+\tt{N}  & \tt{1} \\
+\tt{O}  & \tt{$\overline{RDY}$} \\
+\tt{P}  & \tt{RDY.$\overline{NUL}$} \\
+\tt{Q}  & \tt{RDY.NUL} \\
+\hline
+\tt{R'} & \tt{$\overline{GNT}$} \\
+\tt{R}  & \tt{GNT} \\
+\tt{S}  & \tt{1} \\
+\tt{T'} & \tt{$\overline{RDY}$} \\
+\tt{T}  & \tt{RDY} \\
+\hline
+\end{tabular}
+\endgroup
+\caption{Expression des fonctions de transitions de la MAE du composant Master}
+\label{standard}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+                  & \tt{REQ}       & \tt{CMD\_EN}   & \tt{ADR\_VALUE}         & \tt{READ\_VALUE}   & \tt{LOCK\_VAL} & \tt{DT\_EN}    \\
+\hline
+\tt{INIT}         & \tt{0}         & \tt{0}         & \tt{X}                  & \tt{X}             & \tt{X}         & \tt{0}         \\
+\tt{RAM\_REQ}     & \tt{1}         & \tt{0}         & \tt{X}                  & \tt{X}             & \tt{X}         & \tt{0}         \\
+\tt{RAM\_A0}      & \tt{0}         & \tt{1}         & \tt{ram\_base}          & \tt{1}             & \tt{1}         & \tt{0}         \\
+\tt{RAM\_A1D0}    & \tt{0}         & \tt{1}         & \tt{ram\_base + 4}      & \tt{1}             & \tt{1}         & \tt{0}         \\
+\tt{RAM\_A2D1}    & \tt{0}         & \tt{1}         & \tt{ram\_base + 8}      & \tt{1}             & \tt{1}         & \tt{0}         \\
+\tt{RAM\_A3D2}    & \tt{0}         & \tt{1}         & \tt{ram\_base + 12}     & \tt{1}             & \tt{1}         & \tt{0}         \\
+\tt{RAM\_D3}      & \tt{0}         & \tt{0}         & \tt{X}                  & \tt{X}             & \tt{0}         & \tt{0}         \\
+\tt{W\_REQ}       & \tt{1}         & \tt{0}         & \tt{X}                  & \tt{X}             & \tt{X}         & \tt{0}         \\
+\tt{W\_AD}        & \tt{0}         & \tt{1}         & \tt{seg\_tty\_base}     & \tt{0}             & \tt{0}         & \tt{0}         \\
+\tt{W\_DT}        & \tt{0}         & \tt{0}         & \tt{seg\_tty\_base}     & \tt{0}             & \tt{0}         & \tt{1}         \\
+\tt{STS\_REQ}     & \tt{1}         & \tt{0}         & \tt{X}                  & \tt{X}             & \tt{X}         & \tt{0}         \\
+\tt{STS\_AD}      & \tt{0}         & \tt{1}         & \tt{seg\_tty\_base + 4} & \tt{1}             & \tt{0}         & \tt{0}         \\
+\tt{STS\_DT}      & \tt{0}         & \tt{0}         & \tt{seg\_tty\_base + 4} & \tt{1}             & \tt{0}         & \tt{0}         \\
+\tt{BUF\_REQ}     & \tt{1}         & \tt{0}         & \tt{X}                  & \tt{X}             & \tt{X}         & \tt{0}         \\
+\tt{BUF\_AD}      & \tt{0}         & \tt{1}         & \tt{seg\_tty\_base + 8} & \tt{1}             & \tt{0}         & \tt{0}         \\
+\tt{BUF\_DT}      & \tt{0}         & \tt{0}         & \tt{X}                  & \tt{X}             & \tt{X}         & \tt{0}         \\
+\hline
+\end{tabular}
+\endgroup
+\caption{Valeurs des signaux de sortie de la MAE du composant Master}
+\label{standard}
+\end{table}
 
 
 
