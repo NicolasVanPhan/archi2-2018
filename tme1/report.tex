@@ -1,0 +1,109 @@
+
+\documentclass{article}
+
+%% Packages for French writing
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{layout}
+
+%% Packages for Math symbols
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+
+%% Packages for figures insertion
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{framed}
+\usepackage{float}
+
+%% Package for document margin editing
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+
+%% Package for source code insertion
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{grey}{rgb}{0.97, 0.97, 0.97}
+\definecolor{darkred}{rgb}{0.42, 0, 0}
+\definecolor{darkblue}{rgb}{0, 0, 0.42}
+\definecolor{darkgrey}{rgb}{0.22, 0.22, 0.82}
+\definecolor{green}{HTML}{088A08}
+\lstset{
+  basicstyle=\small\sffamily\footnotesize,
+  captionpos=b,
+  numbers=left,
+  numberstyle=\tiny,
+  tabsize=4,
+  frame=trBL,
+  backgroundcolor=\color{grey},
+  commentstyle=\color{green},
+  keywordstyle=\color{darkblue}\bf,
+  identifierstyle=\color{darkgrey},
+  stringstyle=\color{darkred}
+}
+
+\setlength\parindent{0pt}
+\setlength\parskip{3pt}
+\title{ARCHI2 - Compte-rendu du TME1}
+\author{Nicolas Phan}
+\date{pour le 17 Janvier 2018}
+\begin{document}
+\pagestyle{headings}
+\maketitle
+\tableofcontents
+\newpage
+
+%==================================================================================================
+%=========================  Introduction  =========================================================
+%==================================================================================================
+
+%----------------- Objectif -----------------------------------------------------------------------
+
+\section{Introduction}
+
+\subsection{Objectif}
+
+\begin{figure}[H]
+\includegraphics[width=0.75\textwidth]{pics/conception1.png}
+\centering
+\caption{Schema-bloc des étapes de conception du processeur}
+\label{conception}
+\end{figure}
+
+\begin{enumerate}
+\item \textbf{Modélisation}  : Cela consiste en la description d'un modèle du processeur,
+\end{enumerate}
+
+La Figure \ref{outils} résume le flot de travail et les outils utilisés pour les étapes de Syntèse,
+Placement et Routage.
+
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{ | c | l | l | }
+\hline
+Instruction & Calcul demandé & Calcul standardisé  \\
+\hline
+\tt{AND}      & \tt{ op1 AND op2 }                 & \tt{ op1 AND op2 } \\
+\hline
+end{tabular}
+\endgroup
+\caption{Standardisation des calculs demandés par les regops}
+\label{standard}
+\end{table}
+
+\begin{eqnarray*}
+  \sum_{\substack{k \in [[0, 4]] \\ \texttt{shift\_value(k)} = 1}} 2^k &= \texttt{shift\_value}
+\end{eqnarray*}
+
+%code : les xxx_t
+\lstinputlisting[language=vhdl, firstline=560, lastline=579]{decod.vhdl}
+
+%==================================================================================================
+%=========================  End of the Document  ==================================================
+%==================================================================================================
+
+\end{document}
