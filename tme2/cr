@@ -1,0 +1,43 @@
+
+C1]
+Caracteristique des caches de données et d'instructions :
+taille : 1024 octets
+mapping : direct mapping, pas d'associativité
+taille ligne : 16 octets
+profondeur de TEP : 8 octets
+
+=====> icache_words = 4 words
+=> nombre de lignes : 1024 / 16 = 64
+=> nombre d'ensembles = nombre de lignes (car direct mapping) = 64
+=====> icache_sets = 64
+
+Le cache est a correspondance directe, il n'y a donc qu'un niveau d'associativite
+=====> icache_ways = 1
+
+=====> wbuf_depth = 8
+
+C2]
+Au démarrage de la machine, la RAM est vide. Pour que la machine démarre, il faut bien qu'un premier
+programme s'exécute et charge l'OS de la ROM vers la RAM notamment.
+Ce programme, le code de boot, doit être nécéssairement dans une mémoire contenant des données au moment
+du démarrage, autrement dit dans la ROM.
+
+C3]
+Contrairement aux autres segments, le segment TTY réfère à des registres qui peuvent être modifiés
+par un composant autre que le processeur, sans que le processeur le sache.
+Cacher ces registres entrainerait donc des incohérences mémoire car une donnée cachée deviendait
+incohérente sans que le processeur le sache.
+
+C4]
+Les segments kcode, kunc, kdata contiennent des données appartenant au noyau, elle sont donc
+protégées, de plus le segment tty contient des registres permettant de communiquer avec le périphérique TTY
+et seul l'OS a le droit de communiquer directement avec les périphériques (les programmes user doivent passer
+par lui s'ils veulent communiquer avec un peripherique) donc le segment TTY est protégé aussi.
+
+La protection de ces segments est réalisée en les placant dans la moitié haute de l'espace d'adressage.
+Ce découpage de l'espace d'adressage en 2 moitiés permet de vérifier très simplement si une adresse
+est protégée ou non (par vérification du MSB de l'adresse)
+
+Les fichiers sys.bin et app.bin contiennent déjà dans leurs métadonnées les adresses où charger les segments
+qu'ils contiennent, il n'y a donc pas à spécifier d'adresse dans l'appel au constructeur du loader pour ce type
+de fichiers.

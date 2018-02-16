@@ -1,0 +1,42 @@
+
+
+Au démarrage d'une machine, le premier programme execute est le bootloader,
+un programme présent dans la ROM et dont la principale tache est de charger
+l'OS de la ROM vers la RAM, ceci dure quelques secondes en pratique, cad
+qqe milliards de cycles. En simulation cela dure donc 1000 * qqe milliards de cycles
+=> cela prend 1h.
+Pour éviter d'avoir à attendre sans rien faire pendant environ 1h à chaque fois qu'on lance une simu,
+on va tricher :
+La plateforme soclib offre un service permettant de démarrer une simulation seulement une fois que
+l'OS est chargé en RAM, on saute ainsi la phase de boot.
+Ce service se présente sous la forme d'une classe Loader, instancié puis fourni au constructeur de ram
+dans le fichier top.desc, ouvrant un ficher fourni et chargeant son contenu dans la RAM du prototype virtuel.
+
+Ce loader possède deux modes de chargement :
+un premier mode pour les blobs (fichier binaires dont on ignore le format), auquel cas l'appelant du
+constructeur doit preciser a quelle adresse dans la RAM charger le bloc fourni.
+Un deuxieme mode pour les fichiers objets generes par gcc (.elf = .bin), dans lesquels des metadatas
+sont presentes et indiquent quels segments charger à quelle adresse. L'appelant au constructeur
+n'a donc pas besoin de donner quelconque adresse.
+
+.bin = .elf, convention (peut etre mauvaise)
+pour les blobs : pas de convention .truc, on met rien
+
+
+
+Le lancement dune application est dynamique normalement (via shell), ici on le fera en statique,
+grave dans le code de boot, cela pose un probleme : comment le code de boot se branche a l'appli a la fin ?
+
+luser peut demander a gcc de ranger au debut du segmmetn kdata du coe applicatif
+une table de sceaux, tableau ou haque entree set ladresse vers une fonction
+cette table va contenir les adresses de toutes les fonctions aue choisit luser
+
+par gcc.
+maintenant ya plus besoin que dune seule conventionm
+cest que le segment kdata soit tjrs range au meme endroit.
+
+cest un attribut ds le code c surce jsute avant le nom de la fonction (__constructor)
+qui dit qu;une fonction est un point dentree, et doit donc e rangee dans la table de sceaux
+Pour que le code de boot sache quel est l'adresse de base du segment applicatif.
+
+

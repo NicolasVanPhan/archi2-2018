@@ -26,30 +26,36 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#define SEG_REFSIZE_16B     0x10
+#define SEG_REFSIZE_1KB     0x400
+#define SEG_REFSIZE_4KB     0x1000
+#define SEG_REFSIZE_16KB    0x4000
+#define SEG_REFSIZE_64KB    0x10000
+
 // segment definition
-#define SEG_RESET_BASE  TO BE COMPLETED
-#define SEG_RESET_SIZE  TO BE COMPLETED
+#define SEG_RESET_BASE  0xbfc00000 
+#define SEG_RESET_SIZE  SEG_REFSIZE_4KB
 
-#define SEG_KCODE_BASE  TO BE COMPLETED
-#define SEG_KCODE_SIZE  TO BE COMPLETED
+#define SEG_KCODE_BASE  0x80000000
+#define SEG_KCODE_SIZE  SEG_REFSIZE_16KB 
 
-#define SEG_KDATA_BASE  TO BE COMPLETED
-#define SEG_KDATA_SIZE  TO BE COMPLETED
+#define SEG_KDATA_BASE  0x82000000 
+#define SEG_KDATA_SIZE  SEG_REFSIZE_64KB 
 
-#define SEG_KUNC_BASE   TO BE COMPLETED
-#define SEG_KUNC_SIZE   TO BE COMPLETED
+#define SEG_KUNC_BASE   0x81000000 
+#define SEG_KUNC_SIZE   SEG_REFSIZE_4KB
 
-#define SEG_DATA_BASE   TO BE COMPLETED
-#define SEG_DATA_SIZE   TO BE COMPLETED
+#define SEG_DATA_BASE   0x01000000 
+#define SEG_DATA_SIZE   SEG_REFSIZE_16KB 
 
-#define SEG_CODE_BASE   TO BE COMPLETED
-#define SEG_CODE_SIZE   TO BE COMPLETED
+#define SEG_CODE_BASE   0x00400000 
+#define SEG_CODE_SIZE   SEG_REFSIZE_16KB 
 
-#define SEG_STACK_BASE  TO BE COMPLETED
-#define SEG_STACK_SIZE  TO BE COMPLETED
+#define SEG_STACK_BASE  0x02000000 
+#define SEG_STACK_SIZE  SEG_REFSIZE_16KB
 
-#define SEG_TTY_BASE    TO BE COMPLETED
-#define SEG_TTY_SIZE    TO BE COMPLETED
+#define SEG_TTY_BASE    0x90000000 
+#define SEG_TTY_SIZE    SEG_REFSIZE_16B
 
 // Taget indexes definition
 #define ROM_INDEX	0
@@ -72,13 +78,13 @@ int _main (int argc, char *argv[])
     size_t  from_cycle          = 0;                	// debug start cycle
     size_t  ram_latency		= 0;		    	// ram latency
     bool    snoop_active	= false;	    	// snoop activation
-    size_t  icache_ways     	= TO BE COMPLETED;	// instruction cache number of ways
-    size_t  icache_sets     	= TO BE COMPLETED;	// instruction cache number of sets
-    size_t  icache_words    	= TO BE COMPLETED;	// instruction cache number of words per line
-    size_t  dcache_ways     	= TO BE COMPLETED;	// data cache number of ways
-    size_t  dcache_sets     	= TO BE COMPLETED;	// data cache number of sets
-    size_t  dcache_words    	= TO BE COMPLETED;	// data cache number of words per line
-    size_t  wbuf_depth      	= TO BE COMPLETED;	// write buffer depth
+    size_t  icache_ways     	= 1;  	                // instruction cache number of ways
+    size_t  icache_sets     	= 64;                   // instruction cache number of sets
+    size_t  icache_words    	= 4;              	// instruction cache number of words per line
+    size_t  dcache_ways     	= 1;              	// data cache number of ways
+    size_t  dcache_sets     	= 64;             	// data cache number of sets
+    size_t  dcache_words    	= 4;              	// data cache number of words per line
+    size_t  wbuf_depth      	= 8;              	// write buffer depth
     bool    stats_ok		= false;	    	// statistics activation
     size_t  stats_period	= 0;    	    	// statistics display period 
 
@@ -207,21 +213,20 @@ int _main (int argc, char *argv[])
     PibusSegmentTable	segtable;
 
     segtable.setMSBnumber(8);
-  
     segtable.addSegment("seg_reset"  , SEG_RESET_BASE  , SEG_RESET_SIZE  , ROM_INDEX, true);
-    segtable.addSegment("seg_kcode"  , TO BE COMPLETED                                    );
-    segtable.addSegment("seg_kdata"  , TO BE COMPLETED                                    );
-    segtable.addSegment("seg_kunc"   , TO BE COMPLETED                                    );
-    segtable.addSegment("seg_code"   , TO BE COMPLETED                                    );
-    segtable.addSegment("seg_data"   , TO BE COMPLETED                                    );
-    segtable.addSegment("seg_stack"  , TO BE COMPLETED                                    );
-    segtable.addSegment("seg_tty"    , TO BE COMPLETED                                    );
+    segtable.addSegment("seg_kcode"  , SEG_KCODE_BASE  , SEG_KCODE_SIZE  , RAM_INDEX, true);
+    segtable.addSegment("seg_kdata"  , SEG_KDATA_BASE  , SEG_KDATA_SIZE  , RAM_INDEX, true);
+    segtable.addSegment("seg_kunc"   , SEG_KUNC_BASE   , SEG_KUNC_SIZE   , RAM_INDEX, false);
+    segtable.addSegment("seg_code"   , SEG_CODE_BASE   , SEG_CODE_SIZE   , RAM_INDEX, true);
+    segtable.addSegment("seg_data"   , SEG_DATA_BASE   , SEG_DATA_SIZE   , RAM_INDEX, true);
+    segtable.addSegment("seg_stack"  , SEG_STACK_BASE  , SEG_STACK_SIZE  , RAM_INDEX, true);
+    segtable.addSegment("seg_tty"    , SEG_TTY_BASE    , SEG_TTY_SIZE    , TTY_INDEX, false);
 
     /////////////////////////////////////////////////////////
     //	INSTANCIATED  COMPONENTS
     /////////////////////////////////////////////////////////
 
-    soclib::common::Loader	loader(TO BE COMPLETED);	
+    soclib::common::Loader	loader("sys.bin", "app.bin");	
 
     PibusSegBcu			bcu	("bcu", segtable, 1 , 3, 100);
     PibusMips32Xcache		proc	("proc", segtable, 0, 
