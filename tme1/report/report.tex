@@ -47,7 +47,7 @@
 \setlength\parskip{3pt}
 \title{ARCHI2 - Compte-rendu du TME1}
 \author{Nicolas Phan}
-\date{pour le 17 Janvier 2018}
+\date{pour le 16 Février 2018}
 \begin{document}
 \pagestyle{headings}
 \maketitle
@@ -69,47 +69,96 @@
 \label{mae_ram}
 \end{figure}
 
-\subsection{Question C1}
-
-\begin{table}[!htb]
+\begin{table}[H]
 \centering
 \begingroup
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{ | l | l | }
+\begin{tabular}{| l | p{15cm} |}
 \hline
-Nom    &   Transition  \\
+Etat    & Signification \\
 \hline
-\texttt{A}  &   \tt{SEL.ADR\_OK.$\overline{\tt{READ}}$.DELAY                     }\\
-\texttt{B}  &   \tt{SEL.ADR\_OK.$\overline{\tt{READ}}$.$\overline{\tt{DELAY}}$        }\\
-\texttt{C}  &   \tt{SEL.ADR\_OK.READ.$\overline{\tt{DELAY}}$                     }\\
-\texttt{D}  &   \tt{SEL.ADR\_OK.READ.DELAY                                  }\\
-\texttt{E}  &   \tt{SEL.$\overline{\tt{ADR\_OK}}$                                }\\
-\texttt{F}  &   \tt{$\overline{\tt{SEL}}$                                        }\\
-\texttt{G}  &   \tt{1                                                       }\\
+\tt{IDLE}    & La RAM est inactive, elle n'est la cible d'aucune transaction \\
 \hline
-\texttt{U}  &   \tt{$\overline{\tt{GO}}$                                         }\\
-\texttt{U'} &   \tt{GO                                                      }\\
+\tt{W\_WAIT}   & Une transaction d'écriture dans le composant RAM est en cours,
+        l'automate attend que la RAM soit disponible. \\
 \hline
-\texttt{V}  &   \tt{$\overline{\tt{GO}}$                                         }\\
-\texttt{V'} &   \tt{GO                                                      }\\
+\tt{W\_OK}     & Une transaction d'écriture dans le composant RAM est en cours,
+        la RAM effectue l'écriture. \\
 \hline
-\texttt{X}  &   \tt{SEL.ADR\_OK.$\overline{\tt{READ}}$                           }\\
-\texttt{Y}  &   \tt{SEL.($\overline{\tt{ADR\_OK}}$ + READ)                       }\\
-\texttt{Z}  &   \tt{$\overline{\tt{SEL}}$                                        }\\
+\tt{R\_WAIT}   & Une transaction de lecture dans le composant RAM est en cours,
+        l'automate attend que la RAM doit disponible \\
 \hline
-\texttt{R}  &   \tt{SEL.($\overline{\tt{ADR\_OK}}$ + $\overline{\tt{READ}}$)          }\\
-\texttt{S}  &   \tt{SEL.ADR\_OK.READ                                        }\\
-\texttt{T}  &   \tt{$\overline{\tt{SEL}}$                                        }\\
+\tt{R\_OK}     & Une transaction de lecture dans le composant RAM est en cours,
+        la RAM a effectue la lecture \\
+\hline
+\tt{ERROR}   & Une erreur s'est produite \\
+\hline
+\end{tabular}
+\caption{Description des états de la MAE}
+\endgroup
+\end{table}
+
+\subsection{Question C1}
+
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{ | l | l | l | }
+\hline
+Nom    &   Transition  &    Explication \\
+\hline
+\texttt{A}  &   \tt{SEL.ADR\_OK.$\overline{\tt{READ}}$.DELAY                     } &
+Une requête d'écriture a été recue, la RAM est latente donc l'automate attend. \\
+\texttt{B}  &   \tt{SEL.ADR\_OK.$\overline{\tt{READ}}$.$\overline{\tt{DELAY}}$        } &
+Une requête d'écriture a été recue, l'écriture s'effectue. \\
+\texttt{C}  &   \tt{SEL.ADR\_OK.READ.$\overline{\tt{DELAY}}$                     } &
+idem en lecture \\
+\texttt{D}  &   \tt{SEL.ADR\_OK.READ.DELAY                                  } &
+idem en lecture \\
+\texttt{E}  &   \tt{SEL.$\overline{\tt{ADR\_OK}}$                                } &
+Le composant RAM est la cible d'une transaction comportant une adresse illégale. \\
+\texttt{F}  &   \tt{$\overline{\tt{SEL}}$                                        } &
+Le composant RAM n'est pas sélectionné pour une transaction, il reste inactif. \\
+\texttt{G}  &   \tt{1                                                       } &
+Il n'y a qu'une seule transition sortant de ERROR, elle est donc inconditionnelle. \\
+\hline
+\texttt{U}  &   \tt{$\overline{\tt{GO}}$                                         } &
+La RAM est latente, l'automate reste en état d'attente. \\
+\texttt{U'} &   \tt{GO                                                      } &
+La RAM effectue l'écriture, le composant est à l'état READY \\
+\hline
+\texttt{V}  &   \tt{$\overline{\tt{GO}}$                                         } &
+idem en lecture \\
+\texttt{V'} &   \tt{GO                                                      } &
+idem en lecture \\
+\hline
+\texttt{X}  &   \tt{SEL.ADR\_OK.$\overline{\tt{READ}}$                           } &
+Le composant RAM est toujours sélectionné, ses entrées n'ont pas changé \\
+\texttt{Y}  &   \tt{SEL.($\overline{\tt{ADR\_OK}}$ + READ)                       } &
+Le composant RAM est toujours sélectionné mais ses entrées ont été corrompues \\
+\texttt{Z}  &   \tt{$\overline{\tt{SEL}}$                                        } &
+La transaction se termine, le composant RAM n'est plus sélectionnée \\
+\hline
+\texttt{R}  &   \tt{SEL.($\overline{\tt{ADR\_OK}}$ + $\overline{\tt{READ}}$)          } &
+idem en lecture \\
+\texttt{S}  &   \tt{SEL.ADR\_OK.READ                                        } &
+idem en lecture \\
+\texttt{T}  &   \tt{$\overline{\tt{SEL}}$                                        } &
+idem en lecture \\
 \hline
 \end{tabular}
 \caption{Fonctions de transition de la MAE de SimpleRam}
 \endgroup
 \end{table}
 
+       
+
 \subsection{Question C2}
 
-\begin{table}[!htb]
+\begin{table}[H]
 \centering
 \begingroup
 \setlength{\tabcolsep}{5pt}
@@ -145,6 +194,92 @@ Nom    &   Transition  \\
 \label{mae_ram}
 \end{figure}
 
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{ | l | p{15cm} | }
+\hline
+Etat    & Signification \\
+\hline
+
+\tt{INIT}    &
+Etat initial \\
+\hline
+
+\tt{RAMREQ}  &
+Le maitre demande l'accès au bus pour y effectuer une transaction rafale
+de lecture de 4 mots dans la RAM. \\
+\hline
+
+\tt{RAMA0}   &
+Le maitre vient d'obtenir le bus, il fournit la première adresse \\
+\hline
+
+\tt{RAMA1D0} &
+Le maitre envoie une adresse qui n'est pas la première de la transaction :
+il effectue un transfert rafale. \\
+\hline
+
+\tt{RAMA2D1} &
+Idem, ici le maitre envoie la troisème adresse de la rafale \\
+\hline
+
+\tt{RAMA3D2} &
+Idem, ici le maitre envoie la quatrième adresse de la rafale \\
+\hline
+
+\tt{RAMD3}   &
+Le maitre attend la dernière réponse de la RAM. \\
+\hline
+
+\tt{WREQ}    &
+Le maitre demande l'accès au bus pour y effectuer une transaction d'écriture
+dans le registre DISPLAY du composant TTY dans le but d'afficher un caractère
+à l'écran. \\
+\hline
+
+\tt{WAD} &
+Le maitre vient d'obtenir le bus il fournit sa commande. \\
+\hline
+
+\tt{WDT} &
+Le maitre attend la réponse de la cible \\
+\hline
+
+\tt{STSREQ}  &
+Le maitre demande l'accès au bus pour une transaction de lecture du registre
+STATUS du périphérique TTY afin de déterminer si un caractère a été entré au clavier. \\
+\hline
+
+\tt{STSAD}   &
+Le maitre vient d'obtenir le bus il fournit sa commande. \\
+\hline
+
+\tt{STSDT}   &
+Le maitre attend la réponse de la cible \\
+\hline
+
+\tt{BUFREQ}  &
+Le maitre demande l'accès au bus pour une transaction de lecture du registre
+KEYBUF du TTY afin de connaitre le caractère entré au clavier par l'utilisateur. \\
+\hline
+
+\tt{BUFAD}   &
+Le maitre vient d'obtenir le bus il fournit sa commande. \\
+\hline
+
+\tt{BUFDT}   &
+Le maitre attend la réponse de la cible \\
+\hline
+
+\end{tabular}
+\endgroup
+\caption{Description des etats de l'automate}
+\end{table}
+
+
 \subsection{Question D1}
 
 \begin{table}[H]
@@ -152,43 +287,79 @@ Nom    &   Transition  \\
 \begingroup
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{ | l | l | }
+\begin{tabular}{ | l | l | p{15cm} |}
 \hline
-Nom    &   Transition  \\
+Nom    &   Transition  & Description \\
 \hline
-\tt{A}  & \tt{1} \\
-\tt{B'} & \tt{$\overline{\tt{GNT}}$} \\
-\tt{B}  & \tt{GNT} \\
+\tt{A}  & \tt{1} &
+Une seule transition sort de l'etat INIT, elle est donc inconditionnelle \\
+\tt{B'} & \tt{$\overline{\tt{GNT}}$} &
+Le composant master demande le BUS tant qu'il ne l'a pas obtenu. \\
+\tt{B}  & \tt{GNT} &
+Le maitre a obtenu le bus, il va envoyer sa première commande \\
 \hline
-\tt{C}  & \tt{1} \\
-\tt{D'} & \tt{RDY} \\
-\tt{D}  & \tt{$\overline{\tt{RDY}}$} \\
-\tt{E}  & \tt{RDY} \\
-\tt{E'} & \tt{$\overline{\tt{RDY}}$} \\
-\tt{F}  & \tt{RDY} \\
-\tt{F'} & \tt{$\overline{\tt{RDY}}$} \\
-\tt{G}  & \tt{RDY} \\
-\tt{G'} & \tt{$\overline{\tt{RDY}}$} \\
+\tt{C}  & \tt{1} &
+D'après le protocole PIBUS, lors d'une transaction rafale, la première commande
+est toujours enregistrée par la cible, donc le maitre passe inconditionnellement
+à la deuxième commande une fois que la première est envoyée. \\
+\tt{D'} & \tt{RDY} &
+Tant que la cible n'a pas acquitté, le maitre continue d'envoyer sa commande. \\
+\tt{D}  & \tt{$\overline{\tt{RDY}}$} &
+Le maitre a eu l'acquittement de la cible, il passe à la commande suivante. \\
+\tt{E}  & \tt{RDY} &
+idem \\
+\tt{E'} & \tt{$\overline{\tt{RDY}}$} &
+idem \\
+\tt{F}  & \tt{RDY} &
+Le maitre a bien recu l'avant-dernière réposne, il ne lui reste plus
+qu'à attendre la dernière réponse. \\
+\tt{F'} & \tt{$\overline{\tt{RDY}}$} &
+idem \\
+\tt{G}  & \tt{RDY} &
+Le maitre a recu la dernière réponse, la transaction se termine,
+il passe à la transaction suivante. \\
+\tt{G'} & \tt{$\overline{\tt{RDY}}$} &
+Le maitre reste en état d'attente tant qu'il n'a pas recu la dernière réponse. \\
 \hline
-\tt{H'} & \tt{$\overline{\tt{GNT}}$} \\
-\tt{H}  & \tt{GNT} \\
-\tt{I}  & \tt{1} \\
-\tt{J}  & \tt{$\overline{\tt{RDY}}$} \\
-\tt{K}  & \tt{RDY.LAST} \\
-\tt{L}  & \tt{RDY.$\overline{\tt{LAST}}$} \\
+\tt{H'} & \tt{$\overline{\tt{GNT}}$} &
+même situation que B' \\
+\tt{H}  & \tt{GNT} &
+même situation que B \\
+\tt{I}  & \tt{1} &
+Le maitre a envoyé sa commande, il va attendre la réponse \\
+\tt{J}  & \tt{$\overline{\tt{RDY}}$} &
+Le maitre attend sa réponse de la cible tant qu'il ne l'a pas eue. \\
+\tt{K}  & \tt{RDY.LAST} &
+Le maitre a obtenu une réponse de la cible (RDY, on ne traite pas les cas d'erreur)
+et le caractère envoyé était le dernier, le maitre passe à l'étape suivante. \\
+\tt{L}  & \tt{RDY.$\overline{\tt{LAST}}$} &
+Idem, sauf qu'il ne s'agit pas du dernier caractère, le maitre engage une nouvelle transaction
+pour envoyer le caractère suivant. \\
 \hline
-\tt{M'} & \tt{$\overline{\tt{GNT}}$} \\
-\tt{M}  & \tt{GNT} \\
-\tt{N}  & \tt{1} \\
-\tt{O}  & \tt{$\overline{\tt{RDY}}$} \\
-\tt{P}  & \tt{RDY.$\overline{\tt{NUL}}$} \\
-\tt{Q}  & \tt{RDY.NUL} \\
+\tt{M'} & \tt{$\overline{\tt{GNT}}$} &
+même situation que H' \\
+\tt{M}  & \tt{GNT} &
+même situation que H \\
+\tt{N}  & \tt{1} &
+même situation que I \\
+\tt{O}  & \tt{$\overline{\tt{RDY}}$} &
+même situation que J \\
+\tt{P}  & \tt{RDY.$\overline{\tt{NUL}}$} &
+Le maitre a obtenu le contenu du registre STATUS, et ce-dernier indique qu'un caractère
+a été entré. \\
+\tt{Q}  & \tt{RDY.NUL} &
+Aucun caractère n'a été entré, le maitre continue la lecture en boucle de STATUS. \\
 \hline
-\tt{R'} & \tt{$\overline{\tt{GNT}}$} \\
-\tt{R}  & \tt{GNT} \\
-\tt{S}  & \tt{1} \\
-\tt{T'} & \tt{$\overline{\tt{RDY}}$} \\
-\tt{T}  & \tt{RDY} \\
+\tt{R'} & \tt{$\overline{\tt{GNT}}$} &
+même chose que H' \\
+\tt{R}  & \tt{GNT} &
+même chose que H \\
+\tt{S}  & \tt{1} &
+même chose que I \\
+\tt{T'} & \tt{$\overline{\tt{RDY}}$} &
+La transaction est terminée \\
+\tt{T}  & \tt{RDY} &
+même chose que J \\
 \hline
 \end{tabular}
 \endgroup
@@ -232,11 +403,40 @@ Nom    &   Transition  \\
 \section{Automate du composant PibusSegBcu}
 
 \begin{figure}[H]
-\includegraphics[width=0.75\textwidth]{pics/mae_bus.png}
+\includegraphics[width=0.5\textwidth]{pics/mae_bus.png}
 \centering
 \caption{Graphe de la MAE du composant BCU}
 \label{mae_ram}
 \end{figure}
+
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{ | l | p{15cm} |}
+\hline
+Etat    & Description \\
+\hline
+IDLE    &
+Le BCU est libre et attend une requête,
+le BCU et le maitre sont inactifs \\
+\hline
+AD      &
+Le bus vient d'être alloué au maitre, la première commande est envoyée \\
+\hline
+DTAD    &
+Le bus est alloué à un maitre, il envoie une commande qui n'est pas la première
+de la transaction en cours (le maitre est en train d'effectuer une transaction rafale) \\
+\hline
+DT      &
+Le maitre attend la dernière réponse de la cible, le bus ne lui est plus alloué \\
+\hline
+\end{tabular}
+\endgroup
+\caption{Description des etats de l'automate}
+\end{table}
+
 
 \subsection{Question E1}
 
@@ -245,22 +445,49 @@ Nom    &   Transition  \\
 \begingroup
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{ | l | l | }
+\begin{tabular}{ | l | l | p{10cm} |}
 \hline
 Nom    &   Transition  \\
 \hline
-\tt{X}      & \tt{$\overline{\tt{REQ}}$} \\
-\tt{X}      & \tt{REQ} \\
+\tt{X}      & \tt{$\overline{\tt{REQ}}$} &
+Tant que l'unique maitre ne demande pas le bus, le BCU reste inactif. \\
+\hline
 
-\tt{Y}      & \tt{LOCK} \\
-\tt{Y}      & \tt{$\overline{\tt{LOCK}}$} \\
+\tt{X}      & \tt{REQ} &
+Le maitre a demandé le BCU, comme il est le seul maitre ici, il obtient le bus. \\
+\hline
 
-\tt{Z}      & \tt{LOCK + ($\overline{\tt{ACK != WAIT}}$} \\
-\tt{Z}      & \tt{$\overline{\tt{LOCK}}$ . (ACK != WAIT)} \\
+\tt{Y}      & \tt{LOCK} &
+Il s'agit d'une transaction rafale \\
+\hline
 
-\tt{J}      & \tt{($\overline{\tt{ACK != WAIT}}$)} \\
-\tt{K}      & \tt{(ACK != WAIT) . $\overline{\tt{REQ}}$} \\
-\tt{L}      & \tt{(ACK != WAIT) . REQ} \\
+\tt{Y'}      & \tt{$\overline{\tt{LOCK}}$} &
+IL ne s'agit pas d'une transaction rafale, l'automate va simplement attendre
+la réponse de la cible. \\
+\hline
+
+\tt{Z'}      & \tt{LOCK + $\overline{\tt{(ACK != WAIT)}}$} &
+Tant que le maitre n'a pas envoyé toutes ses commandes ou n'a pas recu
+d'acquittement à celles-ci (excepté pour la dernière), la rafale continue. \\
+\hline
+
+\tt{Z}      & \tt{$\overline{\tt{LOCK}}$ . \tt{(ACK != WAIT)}} &
+Le maitre a envoyé sa dernière commande et a recu l'acquittement pour les
+commandes précédentes, il passe à l'état d'attente de la dernière réponse. \\
+\hline
+
+\tt{J}      & \tt{($\overline{\tt{ACK != WAIT}}$)} &
+Le maitre continue d'attendre la dernière réponse tant qu'il ne l'a pas eue. \\
+\hline
+
+\tt{K}      & \tt{(ACK != WAIT) . $\overline{\tt{REQ}}$} &
+La transaction est terminée, et le maitre n'en demande pas d'autre \\
+\hline
+
+\tt{L}      & \tt{(ACK != WAIT) . REQ} &
+La transaction est terminée, et le maitre redemande une transaction, le BCU
+lui redonne immédiatement le BUS. \\
+
 \hline
 \end{tabular}
 \endgroup
@@ -276,12 +503,12 @@ Nom    &   Transition  \\
 \renewcommand{\arraystretch}{1.1}
 \begin{tabular}{|l|l|l|l|}
 \hline
-        & GNT   & SEL0               & SEL1            \\
+        & GNT             & SEL0               & SEL1            \\
 \hline
-IDLE    & REQ   & 0                  & 0               \\
-AD      & 1     & $A \in zoneRAM$    & $A \in zoneTTY$ \\
-DTAD    & 0     & $A \in zoneRAM$    & $A \in zoneTTY$ \\
-DT      & REQ   & $A \in zoneRAM$    & $A \in zoneTTY$ \\
+IDLE    & \tt{REQ}        & 0                  & 0               \\
+AD      & \tt{1}          & $A \in zoneRAM$    & $A \in zoneTTY$ \\
+DTAD    & \tt{0}          & $A \in zoneRAM$    & $A \in zoneTTY$ \\
+DT      & \tt{$\overline{\tt{WAIT}}$.REQ}   & $A \in zoneRAM$    & $A \in zoneTTY$ \\
 \hline
 \end{tabular}
 \endgroup
@@ -290,7 +517,7 @@ DT      & REQ   & $A \in zoneRAM$    & $A \in zoneTTY$ \\
 
 \subsection{Question E3}
 
-Pour que les bus respectant le protocole PIBUS effectuent les transactions le plus
+Pour que les bus qui respectent le protocole PIBUS effectuent les transactions le plus
 rapidement possible, le protocole spécifie que dans certains cas, une phase d'une transaction
 peut commencer avant qu'une autre phase de la transaction précédente soit terminée :
 le bus est pipeliné. Ici, le bus peut entamer une phase d'allocation pendant la phase de
@@ -301,25 +528,71 @@ réponse de la transaction précédente, c'est pour cela qu l'allocation est ré
 
 \subsection{Question F1}
 
+A la construction du composant master sont fournies les adresses
+de début des segments de l'espace adressable correspondant à la RAM et
+aux registres TTY, respectivement définis par les macros SEG\_RAM\_BASE
+et SEG\_RAM\_TTY.
+
+Le constructeur de RAM prend 0 en tant que target id car ici, la RAM
+est la cible 0 (et le TTY la cible 1), il prend une référence vers l'objet
+segtable, une variable définissant le nombre de cycle de latence de la RAM
+puis un objet de type Loader permettant de charger des données en RAM.
+\newpage
+
 \lstinputlisting[language=c++, firstline=121, lastline=124]{tp1top.cpp}
 
-\subsection{Question F2}
+Ici il s'agit d'affecter les bons signaux aux entrées/sortes des composants.
 
 \lstinputlisting[language=c++, firstline=156, lastline=177]{tp1top.cpp}
 
-\begin{enumerate}
-\item \textbf{Modélisation}  : Cela consiste en la description d'un modèle du processeur,
-\end{enumerate}
+\subsection{Question F2}
 
-La Figure \ref{outils} résume le flot de travail et les outils utilisés pour les étapes de Syntèse,
-Placement et Routage.
+Le segment de l'espace adressable correspondant aux registres du composant TTY
+début à l'adresse définie dans \texttt{SEG\_TTY\_BASE} et est de taille
+16 octets.
+En effet, il y a 4 registres adressables dans le TTY, et ces registres font
+4 octets, il y a donc 16 octets adressables, d'où le 0x00000010.
 
-\begin{eqnarray*}
-  \sum_{\substack{k \in [[0, 4]] \\ \texttt{shift\_value(k)} = 1}} 2^k &= \texttt{shift\_value}
-\end{eqnarray*}
+\lstinputlisting[language=c++, firstline=113, lastline=113]{tp1top.cpp}
 
-%code : les xxx_t
-%\lstinputlisting[language=vhdl, firstline=560, lastline=579]{decod.vhdl}
+\section{Simulation}
+
+\subsection{Question G1}
+La simulation de 10 millions de cycles nécéssite 13 secondes.
+
+\subsection{Question G2}
+
+Le maitre reste en état de demande du Bus pendant un seul cycle,
+il obtient le bus au cycle suivant, il n'y a donc pas d'état d'attente.
+Ceci est dû au fait qu'il n'y a pas d'autres maitres sur le bus,
+étant donné qu'il est le seul maitre susceptible de demander l'accès au bus,
+le BCU n'a pas de raison de le lui refuser.
+
+\subsection{Question G3}
+
+Le maitre attend la réponse de la RAM pendant deux cycles, pendant lesquels
+la RAM est à un état WAIT, ceci est dû à la latence de la RAM qui a été
+fixée à 2 cycles dans le prototype virtuel de l'ensemble.
+
+\subsection{Question G4}
+
+L'affichage d'un caractère sur le TTY prend 3 cycles qui sont les cycles
+d'allocation, commande et réponse de la transaction simple d'écriture
+effectuée par le maitre pour écrire dans le registre DISPLAY du TTY.
+
+\subsection{Question G5}
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{pics/chrono.png}
+\centering
+\caption{Chronogramme des signaux du PIBUS}
+\label{mae_ram}
+\end{figure}
+
+
+
+
+
 
 %==================================================================================================
 %=========================  End of the Document  ==================================================

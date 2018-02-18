@@ -1,3 +1,6 @@
 *.o
 *.x
 *.swp
+*.aux
+*.log
+*.toc
