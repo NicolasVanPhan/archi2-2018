@@ -1,0 +1,206 @@
+
+C1]
+Caractéristique des caches de données et d'instructions :
+taille : 1024 octets
+mapping : direct mapping, pas d'associativité
+taille ligne : 16 octets
+profondeur de TEP : 8 octets
+
+La taille d'une ligne de cache est de 16 octets, autrement dit 4 mots, d'où:
+icache_words = 4
+
+Le nombre de lignes de cache est :
+nombre de lignes = taille totale du cache / taille d'une ligne = 1024/16 = 64
+Puis comme le mapping est direct :
+nombre d'ensembles = nombre de lignes = 64
+icache_sets = 64
+
+Le cache est à correspondance directe, il n'y a donc qu'un niveau
+d'associativité.
+icache_ways = 1
+
+=====> wbuf_depth = 8 FAUX!!
+
+C2]
+Au démarrage de la machine, la RAM est vide. Pour que la machine démarre,
+il faut bien qu'un premier programme s'exécute et charge l'OS de la ROM vers
+la RAM notamment.
+Ce programme, le code de boot, doit être nécéssairement dans une mémoire
+contenant des données au moment du démarrage, autrement dit dans la ROM.
+
+C3]
+Contrairement aux autres segments, le segment TTY réfère à des registres qui
+peuvent être modifiés par un composant autre que le processeur, sans que le
+processeur le sache.
+Cacher ces registres entrainerait donc des incohérences mémoire car une
+donnée cached deviendait incohérente sans que le processeur le sache.
+
+C4]
+Les segments kcode, kunc, kdata contiennent des données appartenant au noyau,
+elle sont donc protégées, de plus le segment tty contient des registres
+permettant de communiquer avec le périphérique TTY et seul l'OS a le droit de
+communiquer directement avec les périphériques (les programmes user doivent
+passer par lui s'ils veulent communiquer avec un peripherique) donc le segment
+TTY est protégé aussi.
+
+La protection de ces segments est réalisée en les placant dans la moitié haute
+de l'espace d'adressage. Ce découpage de l'espace d'adressage en 2 moitiés
+permet de vérifier très simplement si une adresse est protégée ou non
+(par vérification du MSB de l'adresse)
+
+Les fichiers sys.bin et app.bin contiennent déjà dans leurs métadonnées
+les adresses où charger les segments qu'ils contiennent, il n'y a donc pas à
+spécifier d'adresse dans l'appel au constructeur du loader pour ce type
+de fichiers.
+
+D1]
+Pour effectuer un appel système, un utilisateur doit appeler la fonction
+sys_call() en donnant en arguments le numéro de l'apppel système en question
+(quelle fonction appeler) et fournir les arguments en entrée de cette fonction.
+
+Les différents appels système prennent 4 arguments au maximum mais peuvent
+en prendre moins, hors la fonction sys_call() prend toujours 4 arguments.
+Lorsqu'un appel système nécéssite moins de 4 arguments, il faut appeller
+sys_call() en donnant la valeur 0 pour les arguments non utilisés.
+
+La fonction syscall stocke le numéro de syscall et les arguments fournis
+dans des registres. 
+
+La transmission de ces informations (numéro et arguments de syscall)
+se fait via les registres v0 et a0 à a3.
+
+D2]
+__syscall_vector[] est un tableau de 32 mots contenant les adresses
+des différentes fonctions appel système. C'est dans sys_handler.h
+qu'est initialisé ce tableau ainsi que les macros permettant d'accéder à une
+case par un nom intelligible plutôt que par un numéro brut.
+
+__cause_vector[] fonctionne de la même manière sauf qu'il contient l'ensemble
+des adresses des fonction de traitement des exceptions, le tableau et les
+macros d'indexation sont définies dans exc_handler.h
+
+D3]
+proctime() appelle la fonction sys_call() de stdio.c
+sys_call() appelle l'instruction assembleur "syscall"
+_sys_handler, une fonction assembleur de giet.s, est exécuteé.
+	celle-ci va lire le tableau __syscall_vector[] pour obtenir
+	l'adresse de la fonction syscall à appeler, puis appelle
+	cette dernière (en branchant à l'adresse obtenue)
+_proctime() de drivers.c est la fonction vers laquelle _sys_handler a branché
+
+
+E1]
+Le code boot doit accéder aux registres protégés du processeur, or seuls
+les programmes exécutés en mode superviseurs sont autorisés à y accéder
+donc le code boot doit nécessairement être en mode superviseur.
+
+E2]
+La convention permettant au code de boot de récupérer l'adresse du/des points
+d'entrée dans le code applicatif est la suivante :
+Au début du segment kdata se trouve une table de sceaux, un tableau contenant
+l'adresse de la/les fonctions qui sont des points d'entrée dans le code
+applicatif.
+Le code de boot n'a plus qu'à connaitre l'adresse de base du segment kdata
+et il pourra y lire les adresse des points d'entrée dans le code applicatif.
+
+Ici, il n'y a qu'une application utilisateur à lancer, donc qu'un point
+d'entrée, qui se trouvera donc à l'adresse définie par la macro SEG_KDATA_BASE.
+
+E3]
+Si les adresses définies dans ces deux fichiers ne sont pas égales, cela peut
+entrainer des bus error, des segmentation fault voire des écriture de données
+vers les mauvais péripheriques.
+
+Par exemple, si les adresses de base de la RAM et du TTY sont inversées
+entre la définition logicielle et la définition matérielle, alors si un
+programme veut écrire dans les registres du TTY, il enverra une commande
+d'écriture à l'adresse de base du TTY (+ un potentiel offset), or pour le BCU,
+cette adresse correspond a la RAM donc ce dernier selectionnera la RAM comme
+cible, pour peu que l'OS soit charge en RAM vers les premières adresses,
+celui-ci peut se retrouver corrpompu.
+En fin de compte, un programme veut afficher un caractère à l'ecran et finit
+par corrompre le système d'exploitation. 
+
+E4]
+D'après le contenu de sys.ld, le segment RESET contient le code du fichier
+reset.s et le segment KCODE contient le code du systeme d'exploitation,
+en commençant par celui du fichier giet.s
+
+E5]
+D'après le désassemblage de sys.bin, le segment RESET se situe entre les
+adresses 0xbcf00000 et 0xbcf00024, il est donc de taille 0x24 + 1 =
+36 + 1 = 37 octets.
+
+De la même manière, le segment KCODE se situe entre 0x80000000 et 0x80002224
+donc est de taille 0x2224 + 1 = 8741 octets.
+
+E7]
+La fonction système _tty_read() ne contient pas de boucle d'attente :
+si aucun caractere n'est entré au clavier, la fonction n'attend pas et
+renvoie 0.
+En revanche, l'appel système tty_getc() contient une boucle d'attente
+maintenue tant que _tty_read() renvoie 0, autrement dit tant que l'utilisateur
+n'a rien tapé au clavier.
+
+C'est donc la fonction utilisateur et non pas la fonction noyau qui contient
+la boucle d'attente.
+
+E8]
+Le segment utilisateur CODE débute à l'adresse 0x00400000 et se termine à
+0x0040134c, il a donc une taille de 0x134d = 4941 octets.
+
+F1]
+la première transaction sur le bus est une transaction rafale de lecture
+de 4 mots a partir de l'adresse 0xbcf00000 (adresse de base du segment RESET),
+cela correspond à la lecture du bloc contenant la premiere instruction du
+code de boot dans la ROM.
+
+Au démarrage de la machine, la première chose que fait le processeur est
+d'exécuter le code de boot mais comme au démarrage le cache est vide,
+la lecture de la première instruction entraine un miss compulsif.
+A cause de ce miss, le gestionnaire de cache va initier sur le bus
+une transaction de lecture du bloc contenant cette instruction.
+
+C'est au cycle 10 qu'est exécutée la première instruction du code de boot.
+A ce cycle là, la réponse du cache d'instruction est valide et
+l'instruction en question est 0x3c1d0200, ce qui correspond bien au
+code hexadecimal de l'instruction "lui sp, 0x200" qui est la première
+instruction du code de boot (selon le fichier sys.bin.txt).
+
+La deuxième transaction est encore une fois une transaction rafale de lecture
+de 4 mots dans la ROM, mais cette fois à partir de l'adresse 0xbcf0000c,
+4 mots plus loin que pour la première instruction.
+
+Le processeur exécute le code de boot, la premiàre transaction a ramené un bloc
+de 4 mots, contenant les 4 premières instructions du code de boot.
+Celles-ci ont ensuite été exécutées, mais quand le SP passe à l'instruction 5,
+il y a de nouveau un miss compulsif sur le cache d'instruction, qui va donc
+entrainer une lecture du deuxieme bloc du segment RESET.
+Ainsi de suite, il y aura miss compulsif toutes les 4 instructions.
+
+F2]
+la première instruction du main() est l'instruction 0x27bdffd0
+(addiu sp, sp, -48) située à l'adresse 0x004012dc d'après les binaires
+decompiles.
+Et d'après la trace, c'est à partir du cycle 57 que cette instruction
+est exécutée.
+
+F3]
+
+
+Une première transaction (commençant au cycle 90) lit un bloc contenant :
+cycle		adresse		data lue	ascii
+94		0x01000078	6548200a	He
+95		0x0100007c	206f6c6c	llo_
+
+Une deuxieme transaction (commencant au cycle 114) lit le bloc suivant :
+cycle		adresse		data lue	ascii
+116		0x01000080	0x6c726f57	Worl
+117		0x01000084	0x0a202164	d!
+
+Ainsi, c'est au cycle 94 que commence la première transaction corresponant
+à la lecture de la chaine "Hello world!"
+
+
+Missing : F4, wbuf_depth, why loop in user mode and not kern mode? 
+
