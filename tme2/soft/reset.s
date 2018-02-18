@@ -20,8 +20,8 @@ reset:
        	.set noreorder
 
 # initializes stack pointer
-	la	$29,	TO BE COMPLETED		# $29 <= seg_stack_base
-	addiu	$29,	TO BE COMPLETED		# stack size = 16 Kbytes
+	la	$29,	seg_stack_base		# $29 <= seg_stack_base
+	addiu	$29,	0x00002000		# stack size = 16 Kbytes
 
 # initializes SR register
        	li	$26,	0x0000FF13	
