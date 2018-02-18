@@ -56,8 +56,7 @@ app.bin.txt : app.bin
 
 clean :
 	rm -f reset.o giet.o driver.o common.o ctx_handler.o irq_handler.o\
-	sys_handler.o exc_handler.o stdio.o main.o sys.bin.txt\
-	app.bin.txt\
+	sys_handler.o exc_handler.o stdio.o main.o *.txt
 
 mrproper :
 	rm -f sys.bin app.bin	
