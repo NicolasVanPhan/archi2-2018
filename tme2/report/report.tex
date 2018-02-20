@@ -167,12 +167,12 @@ le tableau et les macros d'indexation sont définies dans \texttt{exc\_handler.h
 \textbf{Succession d'appels de fonctions :}
 \begin{itemize}
 \item \texttt{proctime()} appelle la fonction \texttt{sys\_call()} de \texttt{stdio.c}
-\item \texttt{sys\_call()} appelle l'instruction assembleur "syscall"
-\item \texttt{\_sys\_handler,} une fonction assembleur de \texttt{giet.s,} est exécuteé.
-	celle-ci va lire le tableau \texttt{\_\_syscall\_vector[]} pour obtenir
-	l'adresse de la fonction syscall à appeler, puis appelle
-	cette dernière (en branchant à l'adresse obtenue)
-\item \texttt{\_proctime()} de \texttt{drivers.c} est la fonction vers laquelle
+\item \texttt{sys\_call()} execute l'instruction assembleur "syscall"
+\item L'instruction assembleur syscall branche vers la fonction \texttt{\_sys\_handler} de \texttt{giet.s}
+\item \texttt{\_sys\_handler,} va lire le tableau \texttt{\_\_syscall\_vector[]} pour obtenir
+	l'adresse de l'appel système à exécuter, puis se branche à l'adresse obtenue, dans ce cas-ci
+	se branche a \texttt{\_proctime()}.
+\item \texttt{\_proctime()} de \texttt{drivers.c} est exécutée.
 \texttt{\_sys\_handler} a branché.
 \end{itemize}
 
@@ -227,11 +227,19 @@ en commençant par celui du fichier giet.s
 \subsection{Question E5}
 
 D'après le désassemblage de \texttt{sys.bin,} le segment RESET se situe entre les
-adresses \texttt{0xbcf00000} et \texttt{0xbcf00024,} il est donc de taille
-$ \texttt{0x24} + 1 = 36 + 1 = 37 octets. $
+adresses \texttt{0xbcf00000} et \texttt{0xbcf00024,}.
+\texttt{0xbcf00000} est l'adresse du premier mot, et aussi l'adresse du premier
+octet du segment. \texttt{0xbcf00024} est l'adresse du dernier mot, auquel
+il faut ajouter $3$ pour obtenir l'adresse du dernier octet du segment.
+
+Le segment est donc de taile :
+
+$ (\text{adresse dernier octet}) - (\text{adresse premier octet}) + 1
+  = (\texttt{0xbcf00024} + 3) - (\texttt{0xbcf00000}) + 1
+  = 37 octets. $
 
 De la même manière, le segment KCODE se situe entre \texttt{0x80000000}
-et \texttt{0x80002224} donc est de taille $\texttt{0x2224} + 1 = 8741$ octets.
+et \texttt{0x80002224} donc est de taille $\texttt{0x2224} + 3 + 1 = 8744$ octets.
 
 \subsection{Question E6}
 
@@ -252,7 +260,7 @@ la boucle d'attente.
 \subsection{Question E8}
 
 Le segment utilisateur CODE débute à l'adresse \texttt{0x00400000} et se termine à
-\texttt{0x0040134c,} il a donc une taille de $\texttt{0x134d} = 4941$ octets.
+\texttt{0x0040134f} (dernier octet), il a donc une taille de $\texttt{0x135f} + 1 = 4944$ octets.
 
 \section{Exécution du code binaire sur le prototype virtuel}
 
@@ -335,9 +343,6 @@ Cycle	& Adresse	& Donnée Lue	& Traduction ASCII \\
 
 Ainsi, c'est au cycle 94 que commence la première transaction corresponant
 à la lecture de la chaine \texttt{"Hello world!"}.
-
-
-Missing : F4, C1(wbuf\_depth), E7(why loop in user mode and not kern mode?)
 
 %===============================================================================
 %=========================  End of the Document  ===============================
