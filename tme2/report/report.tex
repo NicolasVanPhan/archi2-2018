@@ -62,11 +62,11 @@
 \section{Modélisation de l'architecture matérielle}
 
 \subsection{Question C1}
-
+ 
 Caractéristique des caches de données et d'instructions :
 \begin{itemize}
  \item \textbf{taille :} 1024 octets
- \item \textbf{mapping :} direct mapping, pas d'associativité
+ \item \textbf{mapping :} direct mapping
  \item \textbf{taille ligne :} 16 octets
  \item \textbf{profondeur de TEP :} 8 octets
 \end{itemize}
@@ -76,18 +76,24 @@ $\texttt{icache\_words} = 4$.
 
 Le nombre de lignes de cache est :
 \[ \text{nombre de lignes} =
-   \frac{\text{taille totale du cache}}
+   \frac{\text{taille totale de l'espace adressable}}
 	{\text{taille d'une ligne}}
-    = \frac{1024}{16} = 64
+    = \frac{2^{32}}{16} = 2^{28} 
 \]
-Puis comme le mapping est direct :
-\[ \text{nombre d'ensembles} = \text{nombre de lignes} = 64 \]
+Ensuite, comme le mapping est direct :
+\[ \text{nombre d'ensembles} = \text{nombre de cases de cache}
+  = \frac{\text{taille du cache}}{\text{taille d'une ligne de cache}}
+  = \frac{1024}{16}
+  = 64 \]
 
 D'où $\texttt{icache\_sets} = 64$.
 
 Le cache est à correspondance directe, il n'y a donc qu'un niveau
-d'associativité.
+d'associativité, autrement dit les ensembles comportent 1 case.
 D'où $\texttt{icache\_ways} = 1$.
+
+Enfin, les résultats précédents valent aussi pour le cache de données car
+les caractéristiques des deux caches sont les mêmes.
 
 \subsection{Question C2}
 
