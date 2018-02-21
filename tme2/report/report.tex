@@ -1,0 +1,351 @@
+
+\documentclass{article}
+
+%% Packages for French writing
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{layout}
+
+%% Packages for Math symbols
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+
+%% Packages for figures insertion
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{framed}
+\usepackage{float}
+
+%% Package for document margin editing
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+
+%% Package for source code insertion
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{grey}{rgb}{0.97, 0.97, 0.97}
+\definecolor{darkred}{rgb}{0.42, 0, 0}
+\definecolor{darkblue}{rgb}{0, 0, 0.42}
+\definecolor{darkgrey}{rgb}{0.22, 0.22, 0.82}
+\definecolor{green}{HTML}{088A08}
+\lstset{
+  basicstyle=\small\sffamily\footnotesize,
+  captionpos=b,
+  numbers=left,
+  numberstyle=\tiny,
+  tabsize=4,
+  frame=trBL,
+  backgroundcolor=\color{grey},
+  commentstyle=\color{green},
+  keywordstyle=\color{darkblue}\bf,
+  identifierstyle=\color{darkgrey},
+  stringstyle=\color{darkred}
+}
+
+\setlength\parindent{0pt}
+\setlength\parskip{3pt}
+\title{ARCHI2 - Compte-rendu du TME2}
+\author{Nicolas Phan}
+\date{pour le 23 Février 2018}
+\begin{document}
+\pagestyle{headings}
+\maketitle
+\tableofcontents
+\newpage
+
+%===============================================================================
+%=========================  Introduction  ======================================
+%===============================================================================
+
+
+\section{Modélisation de l'architecture matérielle}
+
+\subsection{Question C1}
+
+Caractéristique des caches de données et d'instructions :
+\begin{itemize}
+ \item \textbf{taille :} 1024 octets
+ \item \textbf{mapping :} direct mapping, pas d'associativité
+ \item \textbf{taille ligne :} 16 octets
+ \item \textbf{profondeur de TEP :} 8 octets
+\end{itemize}
+
+La taille d'une ligne de cache est de 16 octets, autrement dit 4 mots, d'où:
+$\texttt{icache\_words} = 4$.
+
+Le nombre de lignes de cache est :
+\[ \text{nombre de lignes} =
+   \frac{\text{taille totale du cache}}
+	{\text{taille d'une ligne}}
+    = \frac{1024}{16} = 64
+\]
+Puis comme le mapping est direct :
+\[ \text{nombre d'ensembles} = \text{nombre de lignes} = 64 \]
+
+D'où $\texttt{icache\_sets} = 64$.
+
+Le cache est à correspondance directe, il n'y a donc qu'un niveau
+d'associativité.
+D'où $\texttt{icache\_ways} = 1$.
+
+\subsection{Question C2}
+
+Au démarrage de la machine, la RAM est vide. Pour que la machine démarre,
+il faut bien qu'un premier programme s'exécute et charge l'OS de la ROM vers
+la RAM notamment.
+Ce programme, le code de boot, doit être nécéssairement dans une mémoire
+contenant des données au moment du démarrage, autrement dit dans la ROM.
+
+\subsection{Question C3}
+
+Contrairement aux autres segments, le segment TTY réfère à des registres qui
+peuvent être modifiés par un composant autre que le processeur, sans que le
+processeur le sache.
+Cacher ces registres entrainerait donc des incohérences mémoire car une
+donnée cached deviendait incohérente sans que le processeur le sache.
+
+\subsection{Question C4}
+
+Les segments kcode, kunc, kdata contiennent des données appartenant au noyau,
+elle sont donc protégées, de plus le segment tty contient des registres
+permettant de communiquer avec le périphérique TTY et seul l'OS a le droit de
+communiquer directement avec les périphériques (les programmes user doivent
+passer par lui s'ils veulent communiquer avec un périphérique) donc le segment
+TTY est protégé aussi.
+
+La protection de ces segments est réalisée en les plaçant dans la moitié haute
+de l'espace d'adressage. Ce découpage de l'espace d'adressage en 2 moitiés
+permet de vérifier très simplement si une adresse est protégée ou non
+(par vérification du MSB de l'adresse)
+
+Les fichiers \texttt{sys.bin} et \texttt{app.bin} contiennent déjà dans leurs
+métadonnées les adresses où charger les segments qu'ils contiennent,
+il n'y a donc pas à spécifier d'adresse dans l'appel au constructeur
+du loader pour ce type de fichiers.
+
+\newpage
+tp2\_top.cpp : Segmentation de l'espace adressable
+\lstinputlisting[language=c++, firstline=28, lastline=58]{tp2top.cpp}
+
+tp2\_top.cpp : Paramétrage des caches 
+\lstinputlisting[language=c++, firstline=81, lastline=87]{tp2top.cpp}
+
+\section{Système d'exploitation : GIET}
+
+\subsection{Question D1}
+
+Pour effectuer un appel système, un utilisateur doit appeler la fonction
+\texttt{sys\_call()} en donnant en arguments le numéro de l'apppel système en
+question (quelle fonction appeler) et fournir les arguments en entrée
+de cette fonction.
+
+Les différents appels système prennent 4 arguments au maximum mais peuvent
+en prendre moins, hors la fonction \texttt{sys\_call()} prend toujours 4 arguments.
+Lorsqu'un appel système nécéssite moins de 4 arguments, il faut appeller
+\texttt{sys\_call()} en donnant la valeur 0 pour les arguments non utilisés.
+
+La fonction \texttt{syscall()} stocke le numéro de syscall et les arguments fournis
+dans des registres. 
+
+La transmission de ces informations (numéro et arguments de syscall)
+se fait via les registres \texttt{v0} et \texttt{a0} à \texttt{a3}.
+
+\subsection{Question D2}
+
+\texttt{\_\_syscall\_vector[]} est un tableau de 32 mots contenant les adresses
+des différentes fonctions appel système. C'est dans \texttt{sys\_handler.h} 
+qu'est initialisé ce tableau ainsi que les macros permettant d'accéder à une
+case par un nom intelligible plutôt que par un numéro brut.
+
+\texttt{\_\_cause\_vector[]} fonctionne de la même manière sauf qu'il contient
+l'ensemble des adresses des fonction de traitement des exceptions,
+le tableau et les macros d'indexation sont définies dans \texttt{exc\_handler.h}.
+
+\subsection{Question D3}
+
+\textbf{Succession d'appels de fonctions :}
+\begin{itemize}
+\item \texttt{proctime()} appelle la fonction \texttt{sys\_call()} de \texttt{stdio.c}
+\item \texttt{sys\_call()} execute l'instruction assembleur "syscall"
+\item L'instruction assembleur syscall branche vers la fonction \texttt{\_sys\_handler} de \texttt{giet.s}
+\item \texttt{\_sys\_handler,} va lire le tableau \texttt{\_\_syscall\_vector[]} pour obtenir
+	l'adresse de l'appel système à exécuter, puis se branche à l'adresse obtenue, dans ce cas-ci
+	se branche a \texttt{\_proctime()}.
+\item \texttt{\_proctime()} de \texttt{drivers.c} est exécutée.
+\texttt{\_sys\_handler} a branché.
+\end{itemize}
+
+
+\section{Génération du code binaire}
+
+\subsection{Question E1}
+
+Le code boot doit accéder aux registres protégés du processeur, or seuls
+les programmes exécutés en mode superviseurs sont autorisés à y accéder
+donc le code boot doit nécessairement être en mode superviseur.
+
+\lstinputlisting[firstline=22, lastline=24]{reset.s}
+
+\subsection{Question E2}
+
+La convention permettant au code de boot de récupérer l'adresse du/des points
+d'entrée dans le code applicatif est la suivante :
+Au début du segment KDATA se trouve une table de sceaux, un tableau contenant
+l'adresse de la/les fonctions qui sont des points d'entrée dans le code
+applicatif.
+Le code de boot n'a plus qu'à connaitre l'adresse de base du segment kdata
+et il pourra y lire les adresse des points d'entrée dans le code applicatif.
+
+Ici, il n'y a qu'une application utilisateur à lancer, donc qu'un point
+d'entrée, qui se trouvera donc à l'adresse définie par la macro SEG\_KDATA\_BASE.
+
+\lstinputlisting[firstline=12, lastline=30]{seg.ld}
+
+\subsection{Question E3}
+
+Si les adresses définies dans ces deux fichiers ne sont pas égales, cela peut
+entrainer des bus error, des segmentation fault voire des écriture de données
+vers les mauvais péripheriques.
+
+Par exemple, si les adresses de base de la RAM et du TTY sont inversées
+entre la définition logicielle et la définition matérielle, alors si un
+programme veut écrire dans les registres du TTY, il enverra une commande
+d'écriture à l'adresse de base du TTY (+ un potentiel offset), or pour le BCU,
+cette adresse correspond a la RAM donc ce dernier selectionnera la RAM comme
+cible, pour peu que l'OS soit charge en RAM vers les premières adresses,
+celui-ci peut se retrouver corrpompu.
+En fin de compte, un programme veut afficher un caractère à l'ecran et finit
+par corrompre le système d'exploitation. 
+
+\subsection{Question E4}
+
+D'après le contenu de \texttt{sys.ld,} le segment RESET contient le code du fichier
+reset.s et le segment KCODE contient le code du systeme d'exploitation,
+en commençant par celui du fichier giet.s
+
+\subsection{Question E5}
+
+D'après le désassemblage de \texttt{sys.bin,} le segment RESET se situe entre les
+adresses \texttt{0xbcf00000} et \texttt{0xbcf00024,}.
+\texttt{0xbcf00000} est l'adresse du premier mot, et aussi l'adresse du premier
+octet du segment. \texttt{0xbcf00024} est l'adresse du dernier mot, auquel
+il faut ajouter $3$ pour obtenir l'adresse du dernier octet du segment.
+
+Le segment est donc de taile :
+
+$ (\text{adresse dernier octet}) - (\text{adresse premier octet}) + 1
+  = (\texttt{0xbcf00024} + 3) - (\texttt{0xbcf00000}) + 1
+  = 37 octets. $
+
+De la même manière, le segment KCODE se situe entre \texttt{0x80000000}
+et \texttt{0x80002224} donc est de taille $\texttt{0x2224} + 3 + 1 = 8744$ octets.
+
+\subsection{Question E6}
+
+\lstinputlisting[language=C, firstline=8, lastline=12]{main.c}
+
+\subsection{Question E7}
+
+La fonction système \texttt{\_tty\_read()} ne contient pas de boucle d'attente :
+si aucun caractere n'est entré au clavier, la fonction n'attend pas et
+renvoie 0.
+En revanche, l'appel système \texttt{tty\_getc()} contient une boucle d'attente
+maintenue tant que \texttt{\_tty\_read()} renvoie 0, autrement dit tant que
+l'utilisateur n'a rien tapé au clavier.
+
+C'est donc la fonction utilisateur et non pas la fonction noyau qui contient
+la boucle d'attente.
+
+\subsection{Question E8}
+
+Le segment utilisateur CODE débute à l'adresse \texttt{0x00400000} et se termine à
+\texttt{0x0040134f} (dernier octet), il a donc une taille de $\texttt{0x135f} + 1 = 4944$ octets.
+
+\section{Exécution du code binaire sur le prototype virtuel}
+
+\subsection{Question F1}
+
+la première transaction sur le bus est une transaction rafale de lecture
+de 4 mots a partir de l'adresse \texttt{0xbcf00000}
+(adresse de base du segment RESET),
+cela correspond à la lecture du bloc contenant la premiere instruction du
+code de boot dans la ROM.
+
+Au démarrage de la machine, la première chose que fait le processeur est
+d'exécuter le code de boot mais comme au démarrage le cache est vide,
+la lecture de la première instruction entraine un miss compulsif.
+A cause de ce miss, le gestionnaire de cache va initier sur le bus
+une transaction de lecture du bloc contenant cette instruction.
+
+C'est au cycle 10 qu'est exécutée la première instruction du code de boot.
+A ce cycle là, la réponse du cache d'instruction est valide et
+l'instruction en question est \texttt{0x3c1d0200,} ce qui correspond bien au
+code hexadecimal de l'instruction \texttt{lui sp, 0x200} qui est la première
+instruction du code de boot (selon le fichier \texttt{sys.bin.txt}).
+
+La deuxième transaction est encore une fois une transaction rafale de lecture
+de 4 mots dans la ROM, mais cette fois à partir de l'adresse \texttt{0xbcf0000c},
+4 mots plus loin que pour la première instruction.
+
+Le processeur exécute le code de boot, la premiàre transaction a ramené un bloc
+de 4 mots, contenant les 4 premières instructions du code de boot.
+Celles-ci ont ensuite été exécutées, mais quand le SP passe à l'instruction 5,
+il y a de nouveau un miss compulsif sur le cache d'instruction, qui va donc
+entrainer une lecture du deuxieme bloc du segment RESET.
+Ainsi de suite, il y aura miss compulsif toutes les 4 instructions.
+
+\subsection{Question F2}
+
+la première instruction du \texttt{main()} est l'instruction \texttt{0x27bdffd0}
+(\texttt{addiu sp, sp, -48}) située à l'adresse \texttt{0x004012dc} d'après les binaires
+decompiles.
+Et d'après la trace, c'est à partir du cycle 57 que cette instruction
+est exécutée.
+
+\subsection{Question F3}
+
+Une première transaction (commençant au cycle 90) lit un bloc contenant :
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{| l | l | l | l |}
+\hline
+Cycle	& Adresse	& Donnée Lue	& Traduction ASCII \\
+\hline
+94	& 0x01000078	& 6548200a	& He \\
+\hline
+95	& 0x0100007c	& 206f6c6c	& llo\_ \\
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+
+Une deuxieme transaction (commencant au cycle 114) lit le bloc suivant :
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{| l | l | l | l|}
+\hline
+Cycle	& Adresse	& Donnée Lue	& Traduction ASCII \\
+\hline
+116	& 0x01000080	& 0x6c726f57	& Worl \\
+117	& 0x01000084	& 0x0a202164	& d! \\
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+Ainsi, c'est au cycle 94 que commence la première transaction corresponant
+à la lecture de la chaine \texttt{"Hello world!"}.
+
+%===============================================================================
+%=========================  End of the Document  ===============================
+%===============================================================================
+
+\end{document}
