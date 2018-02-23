@@ -1,0 +1,50 @@
+
+Points de cours :
+
+Le cache ici est Write Through : les rqt d'ecriture sont forwarded vers
+la memoire, comme si le cache n'existait pas.
+
+Le cache est bloquant : Tant qu'une requete n'a pas ete satisfaite, le proc
+est gele.
+
+Interface IREQ :
+	addr	(30)
+	valid	(1)	le proc effectue une requete ou non
+	mode	(1)	le proc est en mode U ou S
+
+Interface IRSP :
+	instr	(32)	l'instruction lue depuis le cache/la memoire
+	valid	(1)	l'instruction donnee est valide ou pas
+				(aka le proc doit geler ou pas)
+	error	(1)	l'adresse fournie est illegale
+				(l'OS va tuer le fautif)
+
+Interface DREQ :
+	addr	(30)
+	valid	(1)
+	mode	(1)
+	type	(3)	READ, WRITE, Linked-Load, Store-cond, XTNREAD, XTNWRITE
+	wdata	(32)	la donnee a ecrire
+	be	(4)	pour byte-enable, indique quels octets du mot ecrire
+
+Interface DRSP :
+	rdata	(32)	la donnee lue (dans le cas write ce signal est inutile)
+	valid	(1)	read:la donne lue est valide / write:la rqt a ete prise
+	error	(1)
+
+
+LES DIFFERENTES SITUATIONS :
+============================
+
+Une instruction est demandee			chaque cycle
+	Il y a hit				(N-1)/N cycles, N=taille ligne
+	Il y a miss				1/N
+
+		Dans ce cas IFSM emet une requete de lecture vers PIBUSFSM
+		Attend la reponse (le proc est gele pdnt ce temps la)
+		Puis stocke la reponse dans le cache
+
+
+a completer
+
+C1 ] 
