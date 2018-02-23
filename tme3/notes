@@ -48,3 +48,46 @@ Une instruction est demandee			chaque cycle
 a completer
 
 C1 ] 
+
+Adresse 1ere instruction main est
+Le code commence par .word main puis space 124,
+ca veut dire que le code commencant au label main sera place ici,
+le space 124 c'est lespace pour tout le code.
+
+@main = @debut segment = 0x00400000;
+
+@debut loop = @debut main + 4*3 = 0x0040000c
+
+C2 ]
+
+@base 1 = SEGBASE + 124 = 0x0040007c
+
+@base 2 = @base 1 + 4*20 + 48 = 0x004000fc
+
+@base 3 = @base 2 + 4*20 + 48 = 0x0040017c
+
+C3 ]
+C'est une optimisation de code permettant d'avoir moins de gel,
+apres le bne de toute facon il faut placer un instruction dans le Delayed Slot,
+autant de pas mettre un Nop mais une instruction utile.
+
+C4 ]
+Nbre cycles / iteration = nb instructions + nb cycles gel
+= 7 + 0 = 7 cycles/it
+
+0x00400000
+BYTE = 0
+SET = 0
+TAG = 0000 0000 0100 0000 0000 0000 0 = 0x8000
+
+
+D1 ]
+Les lignes de cache mesurent 4 mots = 16 octets = 2^4 octets
+donc le champ BYTE comporte 4 bits.
+
+Le cache comporte 8 cases donc 8 ensemble (direct mapping)
+donc le champ SET comporte 3 bits. 
+
+Par soustraction, le champ TAG comporte 32 - 4 - 3 = 25 bits
+
+
