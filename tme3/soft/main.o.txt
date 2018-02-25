@@ -1,0 +1,103 @@
+
+main.o:     file format elf32-littlemips
+
+
+Disassembly of section .reginfo:
+
+00000000 <.reginfo>:
+   0:	b0001dd0 	0xb0001dd0
+	...
+
+Disassembly of section .mydata:
+
+00000000 <A-0x80>:
+	...
+
+00000080 <A>:
+  80:	00000001 	movf	zero,zero,$fcc0
+  84:	00000002 	srl	zero,zero,0x0
+  88:	00000003 	sra	zero,zero,0x0
+  8c:	00000004 	sllv	zero,zero,zero
+  90:	00000005 	0x5
+  94:	00000006 	srlv	zero,zero,zero
+  98:	00000007 	srav	zero,zero,zero
+  9c:	00000008 	jr	zero
+  a0:	00000009 	jalr	zero,zero
+  a4:	0000000a 	movz	zero,zero,zero
+  a8:	0000000b 	movn	zero,zero,zero
+  ac:	0000000c 	syscall
+  b0:	0000000d 	break
+  b4:	0000000e 	0xe
+  b8:	0000000f 	sync
+  bc:	00000010 	mfhi	zero
+  c0:	00000011 	mthi	zero
+  c4:	00000012 	mflo	zero
+  c8:	00000013 	mtlo	zero
+  cc:	00000014 	0x14
+	...
+
+00000100 <B>:
+ 100:	00000065 	0x65
+ 104:	00000066 	0x66
+ 108:	00000067 	0x67
+ 10c:	00000068 	0x68
+ 110:	00000069 	0x69
+ 114:	0000006a 	0x6a
+ 118:	0000006b 	0x6b
+ 11c:	0000006c 	0x6c
+ 120:	0000006d 	0x6d
+ 124:	0000006e 	0x6e
+ 128:	0000006f 	0x6f
+ 12c:	00000070 	tge	zero,zero,0x1
+ 130:	00000071 	tgeu	zero,zero,0x1
+ 134:	00000072 	tlt	zero,zero,0x1
+ 138:	00000073 	tltu	zero,zero,0x1
+ 13c:	00000074 	teq	zero,zero,0x1
+ 140:	00000075 	0x75
+ 144:	00000076 	tne	zero,zero,0x1
+ 148:	00000077 	0x77
+ 14c:	00000078 	0x78
+	...
+
+00000180 <C>:
+	...
+
+Disassembly of section .mycode:
+
+00000000 <main>:
+   0:	3c080000 	lui	t0,0x0
+   4:	25080080 	addiu	t0,t0,128
+   8:	24070014 	li	a3,20
+   c:	24060000 	li	a2,0
+
+00000010 <loop>:
+  10:	8d0a0000 	lw	t2,0(t0)
+  14:	8d0b0080 	lw	t3,128(t0)
+  18:	20c60001 	addi	a2,a2,1
+  1c:	21080004 	addi	t0,t0,4
+  20:	014b6020 	add	t4,t2,t3
+  24:	14c7fffa 	bne	a2,a3,10 <loop>
+  28:	ad0c00fc 	sw	t4,252(t0)
+
+0000002c <print>:
+  2c:	3c040000 	lui	a0,0x0
+  30:	2484004c 	addiu	a0,a0,76
+  34:	23bdfffc 	addi	sp,sp,-4
+  38:	0c000000 	jal	0 <main>
+  3c:	00000000 	nop
+  40:	23bd0004 	addi	sp,sp,4
+
+00000044 <suicide>:
+  44:	0c000000 	jal	0 <main>
+  48:	00000000 	nop
+
+0000004c <message>:
+  4c:	2121210a 	addi	at,t1,8458
+  50:	63657620 	0x63657620
+  54:	20726f74 	addi	s2,v1,28532
+  58:	206d7573 	addi	t5,v1,30067
+  5c:	706d6f63 	0x706d6f63
+  60:	6574656c 	0x6574656c
+  64:	21212064 	addi	at,t1,8292
+  68:	Address 0x0000000000000068 is out of bounds.
+

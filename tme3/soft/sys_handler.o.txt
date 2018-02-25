@@ -1,0 +1,133 @@
+
+sys_handler.o:     file format elf32-littlemips
+
+
+Disassembly of section .text:
+
+00000000 <_sys_ukn>:
+   0:	27bdffe0 	addiu	sp,sp,-32
+   4:	afbf001c 	sw	ra,28(sp)
+   8:	afbe0018 	sw	s8,24(sp)
+   c:	03a0f021 	move	s8,sp
+  10:	3c020000 	lui	v0,0x0
+  14:	24440000 	addiu	a0,v0,0
+  18:	0c000000 	jal	0 <_sys_ukn>
+  1c:	00000000 	nop
+  20:	3c020000 	lui	v0,0x0
+  24:	24440024 	addiu	a0,v0,36
+  28:	0c000000 	jal	0 <_sys_ukn>
+  2c:	00000000 	nop
+  30:	3c020000 	lui	v0,0x0
+  34:	2442002c 	addiu	v0,v0,44
+  38:	afc20014 	sw	v0,20(s8)
+  3c:	0c00001d 	jal	74 <_get_epc>
+  40:	00000000 	nop
+  44:	afc20010 	sw	v0,16(s8)
+  48:	8fc20014 	lw	v0,20(s8)
+  4c:	24420002 	addiu	v0,v0,2
+  50:	8fc40010 	lw	a0,16(s8)
+  54:	00402821 	move	a1,v0
+  58:	0c000000 	jal	0 <_sys_ukn>
+  5c:	00000000 	nop
+  60:	8fc40014 	lw	a0,20(s8)
+  64:	0c000000 	jal	0 <_sys_ukn>
+  68:	00000000 	nop
+  6c:	0c000000 	jal	0 <_sys_ukn>
+  70:	00000000 	nop
+
+00000074 <_get_epc>:
+  74:	27bdfff0 	addiu	sp,sp,-16
+  78:	afbe000c 	sw	s8,12(sp)
+  7c:	03a0f021 	move	s8,sp
+  80:	40027000 	mfc0	v0,c0_epc
+  84:	afc20000 	sw	v0,0(s8)
+  88:	8fc20000 	lw	v0,0(s8)
+  8c:	03c0e821 	move	sp,s8
+  90:	8fbe000c 	lw	s8,12(sp)
+  94:	03e00008 	jr	ra
+  98:	27bd0010 	addiu	sp,sp,16
+
+0000009c <_procnumber>:
+  9c:	27bdfff8 	addiu	sp,sp,-8
+  a0:	afbe0004 	sw	s8,4(sp)
+  a4:	03a0f021 	move	s8,sp
+  a8:	24020001 	li	v0,1
+  ac:	03c0e821 	move	sp,s8
+  b0:	8fbe0004 	lw	s8,4(sp)
+  b4:	27bd0008 	addiu	sp,sp,8
+  b8:	03e00008 	jr	ra
+  bc:	00000000 	nop
+
+Disassembly of section .data:
+
+00000000 <_syscall_vector>:
+	...
+  3c:	0000009c 	0x9c
+	...
+
+Disassembly of section .reginfo:
+
+00000000 <.reginfo>:
+   0:	e0000034 	sc	zero,52(zero)
+	...
+
+Disassembly of section .pdr:
+
+00000000 <.pdr>:
+   0:	00000000 	nop
+   4:	c0000000 	ll	zero,0(zero)
+   8:	fffffffc 	sdc3	$31,-4(ra)
+	...
+  14:	00000020 	add	zero,zero,zero
+  18:	0000001e 	0x1e
+  1c:	0000001f 	0x1f
+  20:	00000074 	teq	zero,zero,0x1
+  24:	40000000 	mfc0	zero,c0_index
+  28:	fffffffc 	sdc3	$31,-4(ra)
+	...
+  34:	00000010 	mfhi	zero
+  38:	0000001e 	0x1e
+  3c:	0000001f 	0x1f
+  40:	0000009c 	0x9c
+  44:	40000000 	mfc0	zero,c0_index
+  48:	fffffffc 	sdc3	$31,-4(ra)
+	...
+  54:	00000008 	jr	zero
+  58:	0000001e 	0x1e
+  5c:	0000001f 	0x1f
+
+Disassembly of section .rodata:
+
+00000000 <.rodata>:
+   0:	21210a0a 	addi	at,t1,2570
+   4:	6e552021 	0x6e552021
+   8:	69666564 	0x69666564
+   c:	2064656e 	addi	a0,v1,25966
+  10:	74737953 	jalx	1cde54c <_procnumber+0x1cde4b0>
+  14:	43206d65 	c0	0x1206d65
+  18:	206c6c61 	addi	t4,v1,27745
+  1c:	0a212121 	j	8848484 <_procnumber+0x88483e8>
+  20:	00000000 	nop
+  24:	4350450a 	c0	0x150450a
+  28:	00203d20 	0x203d20
+  2c:	30307830 	andi	s0,at,0x7830
+  30:	30303030 	andi	s0,at,0x3030
+  34:	00003030 	tge	zero,zero,0xc0
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	43434700 	c0	0x1434700
+   4:	4728203a 	c1	0x128203a
+   8:	2029554e 	addi	t1,at,21838
+   c:	2e332e34 	sltiu	s3,s1,11828
+  10:	Address 0x0000000000000010 is out of bounds.
+
+
+Disassembly of section .gnu.attributes:
+
+00000000 <.gnu.attributes>:
+   0:	00000f41 	0xf41
+   4:	756e6700 	jalx	5b99c00 <_procnumber+0x5b99b64>
+   8:	00070100 	sll	zero,a3,0x4
+   c:	01040000 	0x1040000

@@ -42,10 +42,10 @@ loop :
         sw   $12, 	252($8)	        # C[i] <= $12
 print:
         la   $4, message
-        addi $29,       $29     -4
+        addi $29,       $29,     -4
         jal  tty_puts
         nop
-        addi $29,       $29     +4
+        addi $29,       $29,     +4
 suicide:	
         jal  exit
         nop
