@@ -1,0 +1,710 @@
+
+\documentclass{article}
+
+%% Packages for French writing
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{layout}
+
+%% Packages for Math symbols
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+
+%% Packages for figures insertion
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{framed}
+\usepackage{float}
+
+%% Package for document margin editing
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+
+%% Package for source code insertion
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{grey}{rgb}{0.97, 0.97, 0.97}
+\definecolor{darkred}{rgb}{0.42, 0, 0}
+\definecolor{darkblue}{rgb}{0, 0, 0.42}
+\definecolor{darkgrey}{rgb}{0.22, 0.22, 0.82}
+\definecolor{green}{HTML}{088A08}
+\lstset{
+  basicstyle=\small\sffamily\footnotesize,
+  captionpos=b,
+  numbers=left,
+  numberstyle=\tiny,
+  tabsize=4,
+  frame=trBL,
+  backgroundcolor=\color{grey},
+  commentstyle=\color{green},
+  keywordstyle=\color{darkblue}\bf,
+  identifierstyle=\color{darkgrey},
+  stringstyle=\color{darkred}
+}
+
+\setlength\parindent{0pt}
+\setlength\parskip{3pt}
+\title{ARCHI2 - Compte-rendu du TME3}
+\author{Nicolas Phan}
+\date{pour le 2 Mars 2018}
+\begin{document}
+\pagestyle{headings}
+\maketitle
+\tableofcontents
+\newpage
+
+%===============================================================================
+%=========================  Introduction  ======================================
+%===============================================================================
+
+\section{Application logicielle}
+
+\subsection{Question C1}
+
+L'instruction \texttt{.word main} place le code commencant au label \texttt{main
+} avant les tableaux A, B et C, le code de la fonction main commence
+donc au début du segment \texttt{CODE}, autrement dit à l'adresse \texttt{0x00400000}.  
+
+Le début de boucle commencce quatre instructions après le début de main,
+donc 4 mots plus tard, donc $\text{@boucle} = \text{@main} + 4 \times 4 = \texttt{0x00400010}$
+
+\subsection{Question C2}
+
+Les directives \texttt{.word main } et \texttt{.space 124 } indiquent que le le tableau A se situe
+$4 \text{(taille du word)} + 124$ octets plus loin que le début du segment DATA, donc :
+\[ \text{@base 1} = \texttt{SEG\_DATA\_BASE} + 128 = \texttt{0x01000080} \]
+Puis entre A et B il y a 20 mots plus un espace de 48 octets, d'où :
+\[ \text{@base 2} = \text{@base 1} + 4 \times 20 + 48 = \texttt{0x01000100} \]
+De la même manière :
+\[ \text{@base 3} = \text{@base 2} + 4 \times 20 + 48 = \texttt{0x01000180} \]
+
+\subsection{Question C3}
+
+Placer \texttt{sw} après \texttt{bne} est une optimisation de code permettant de réduire le nombre
+de cycles de gel par itérations.
+Apres le \texttt{bne}  l y aura un Delayed Slot, autant de pas y mettre un \texttt{Nop}  mais
+une instruction utile.
+
+\subsection{Question C4}
+
+Ici :
+\begin{align*}
+\text{nombre cycles par iteration}  &= \text{nb instructions} + \text{nb cycles gel} \\
+&= 7 + 0 \\
+&= 7 \text{cycles/it} \\
+\end{align*}
+
+
+\section{Fonctionnement du cache instruction}
+
+\subsection{Question D1}
+
+Les lignes de cache mesurent $4$ mots = $16$ octets = $2^4$ octets
+donc le champ \texttt{BYTE}  comporte $4$ bits.
+
+Une ligne de cache mesure $16$ octets et le cache est de $128$ octets,
+il comporte donc $ \frac{128}{16} = 8$ cases.
+Le cache comporte $8$ cases donc $8$ ensemble (direct mapping)
+donc le champ \texttt{SET}  comporte $3$ bits. 
+
+Par soustraction, le champ \texttt{TAG}  comporte $32 - 4 - 3 = 25$ bits
+
+Pour l'adresse \texttt{0x00400000} , nous avons :
+
+\texttt{BYTE = 0} 
+
+\texttt{SET = 0} 
+
+\texttt{TAG = 0000 0000 0100 0000 0000 0000 0 = 0x8000}
+
+\subsection{Question D2}
+
+La toute première ligne lui produit un miss compulsif,
+elle correspond à l'adresse \texttt{0x00400000}  ($\texttt{SET}  = 0$, $\texttt{TAG}  = \texttt{0x8000} $)
+donc le controlleur de cache ramène la ligne de cache comportant
+les 4 premières instructions dans la case 0 du cache.
+
+Les 4 premières instructions sont exécutées puis la lecture de la 5ème
+produit un miss compulsif, cette instruction à l'adresse \texttt{0x00400010}  
+($\texttt{SET}  = 1$, $\texttt{TAG}  = \texttt{0x8000} $) donc la ligne de cache
+correspondante sera ramenée à la case 1.
+
+Par cette logique de quatre en quatre, ce seront donc les instructions
+\texttt{lui} , \texttt{lw \$10} et \texttt{add}  qui entraineront un miss sur le cache d'instructions.
+
+Etat du cache d'instructions à la fin de la première itération :
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{| l | l | l | l | l | l | l |}
+
+\hline
+CASE & TAG & V & WORD3 & WORD2 & WORD1 & WORD0 \\
+\hline
+0 &\texttt{0x8000} & 1 & \texttt{li} & \texttt{li} & \texttt{addiu} & \texttt{lui} \\
+\hline
+1 &\texttt{0x8000} & 1 & \texttt{addi} & \texttt{addi} & \texttt{lw} & \texttt{lw} \\
+\hline
+2 & \texttt{0x8000} & 1 & \texttt{lui} & \texttt{sw} & \texttt{bne} & \texttt{add} \\
+\hline
+3&&0&&&&\\
+\hline
+4&&0&&&&\\
+\hline
+5&&0&&&&\\
+\hline
+6&&0&&&&\\
+\hline
+7&&0&&&&\\
+\hline
+
+\end{tabular}
+\caption{Etat du cache d'instructions}
+\endgroup
+\end{table}
+
+
+\subsection{Question D3}
+
+L'exécutions des itérations suivantes ne changent pas l'état du cache
+d'instructions car toutes les instructions à exécuter sont déjà présentes
+dans le cache d'instructions.
+A la fin de la 20ème itération, l'état du cache est le même qu'à la fin
+de la première.
+
+L'exécution de la boucle entraine donc 2 miss (pour la première itération)
+pour l'exécution de $20 \times 2 = 40$ instructions de lecture. Le taux de miss est donc
+environ de $\frac{2}{40} = 5$ \%.
+
+\subsection{Question D4}
+
+L'état \texttt{MISS\_SELECT}  est indispensable pour les caches de niveau d'associativité
+2 où plus. Dans ces caches, plusieurs cases de cache sont possibles pour
+stocker une ligne de cache donnée, donc l'automate doit nécessairement choisir
+la case où stocker une ligne.
+
+\subsection{Question D5}
+
+
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{| l | p{14cm} |}
+
+\hline
+\textbf{Etat} & \textbf{Signification} \\
+\hline
+\hline
+IDLE
+&
+L'automate n'a affaire à aucun MISS
+\\
+\hline
+
+ERROR
+&
+Une adresse invalide a été demandée
+\\
+\hline
+
+MISS\_SELECT
+&
+Un miss cachable s'est produit, l'automate sélectionne la case où
+stocker la ligne à ramener.
+\\
+\hline
+
+MISS\_WAIT
+&
+Un miss cachable s'est produit, l'automate attend que l'automate PIBUS\_FSM
+ait amenée la ligne de cache dans le registre tampon.
+\\
+\hline
+
+MISS\_UPDT
+&
+L'automate envoie la ligne récupérée dans le registre tampon vers la case
+de cache choisie.
+\\
+\hline
+
+UNC\_WAIT
+&
+Un miss non-cachable s'est produit, l'automate attend que PIBUS\_FSM ait
+amenée la donnée demandée dans le registre tampon.
+\\
+\hline
+
+UNC\_GO
+&
+Un miss non-cachable s'est produit, l'automate redirige la donnée recue
+dans le registre tampon vers le processeur.
+\\
+\hline
+
+\end{tabular}
+\caption{Signification des états}
+\endgroup
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{| l | l | p{12cm} |}
+
+\hline
+Transition & Expression booleenne & Signification \\
+\hline
+\hline
+C
+&
+$\overline{\texttt{IREQ}}$ + $\overline{\texttt{IMISS}}$
+&
+Si le processeur ne demande rien ou s'il demande quelque chose qui est bien
+dans le cache, alors il n'y a pas miss.
+\\
+\hline
+
+A
+&
+\texttt{IREQ}  . \texttt{IMISS}  . \texttt{IUNC}  
+&
+Le processeur demande une donnée non cachable, cela a (nécéssairement) entrainé
+un miss.
+\\
+\hline
+
+B
+&
+\texttt{IREQ}  . \texttt{IMISS}  . $\overline{\texttt{IUNC}}$
+&
+Le processeur demande une donnée cachable mais celle-ci n'est pas dans le cache.
+\\
+\hline
+\hline
+I
+&
+1
+&
+\\
+\hline
+
+F
+&
+\texttt{VALID}  + $\overline{\texttt{ERROR}}$
+&
+L'automate a recu une réponse sans erreur de la part de PIBUS\_FSM,
+il passe à la mise à jour du cache.
+\\
+\hline
+
+G
+&
+\texttt{VALID}  +\texttt{ERROR}  
+&
+L'automate a recu une réponse d'erreur de la part de PIBUS\_FSM,
+il passe à l'état d'erreur.
+\\
+\hline
+
+H
+&
+ $\overline{\texttt{VALID}}$
+&
+PIBUS\_FSM n'a toujours pas donné sa réponse, l'automate continue d'attendre.
+\\
+\hline
+
+N
+&
+1
+&
+\\
+
+\hline
+\hline
+
+J
+&
+ $\overline{\texttt{VALID}}$
+&
+PIBUS\_FSM n'a toujours pas donné sa réponse, l'automate continue d'attendre.
+\\
+\hline
+
+K
+&
+\texttt{VALID}  +\texttt{ERROR}  
+&
+L'automate a recu une réponse d'erreur de la part de PIBUS\_FSM,
+il passe à l'état d'erreur.
+\\
+\hline
+
+L
+&
+\texttt{VALID}  + $\overline{\texttt{ERROR}}$
+&
+L'automate a recu une réponse sans erreur de la part de PIBUS\_FSM,
+il passe à l'état de redirection de la donnée vers le processeur.
+\\
+\hline
+
+M
+&
+1
+&
+\\
+\hline
+
+\end{tabular}
+\caption{Transitions de l'automate}
+\endgroup
+\end{table}
+
+\subsection{Question D6}
+
+L'activation du signal RESETN force cet automate anisi que les deux autres
+à l'état IDLE.
+
+
+\section{Fonctionnement du cache de donnees}
+
+\subsection{Question E1}
+
+Pour l'adresse \texttt{0x01000080} (\texttt{A[0]}), nous avons :
+
+\texttt{BYTE = 0} 
+
+\texttt{SET = 0} 
+
+\texttt{TAG = 0000 0001 0000 0000 0000 0000 1 = 0x20001}
+
+Pour l'adresse \texttt{0x01000100} (\texttt{B[0]}), nous avons :
+
+\texttt{BYTE = 0} 
+
+\texttt{SET = 0} 
+
+\texttt{TAG = 0000 0001 0000 0000 0000 0001 0 = 0x20002}
+
+Le premier \texttt{lw} entraine un miss compulsif où les 4 premieres cases
+du tableau A sont ramenées dans la case 0 du cache. Puis le deuxième
+\texttt{lw} entraine aussi un miss compulsif, sauf que la case associée
+aux 4 premiers mots du tableau B est aussi la case 0, donc le début du
+tableau A est évincé du cache.
+
+Etat du cache de données à la fin de la première itération :
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{| l | l | l | l | l | l | l |}
+
+\hline
+CASE & TAG & V & WORD3 & WORD2 & WORD1 & WORD0 \\
+\hline
+0 &\texttt{0x20002} & 1 & 104 & 103 & 102 & 101 \\ 
+\hline
+1&&0&&&&\\
+\hline
+2&&0&&&&\\
+\hline
+3&&0&&&&\\
+\hline
+4&&0&&&&\\
+\hline
+5&&0&&&&\\
+\hline
+6&&0&&&&\\
+\hline
+7&&0&&&&\\
+\hline
+
+\end{tabular}
+\caption{Etat du cache de données}
+\endgroup
+\end{table}
+
+\subsection{Question E2}
+
+A la deuxième itération, le premier lw entrainera un miss conflit cette fois,
+car il a été évincé précédemment par le tableau B : Les deux tableaux sont
+en conflit donc lorsque les lw n'entrainent pas de miss compulsifs, ils
+entrainent toujours des miss conflit. Le taux de miss est donc de 100 \%.
+
+Les miss seront compulsifs aux itétations $n$ où $n \mod 4 = 1$, là où la case du
+tableau demandée est au début d'une nouvelle ligne.
+Dans les autres cas il s'agira de miss conflits.
+
+Etat du cache de données à la fin de la dernière itération :
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{| l | l | l | l | l | l | l |}
+
+\hline
+CASE & TAG & V & WORD3 & WORD2 & WORD1 & WORD0 \\
+\hline
+0 &\texttt{0x20002} & 1 & 104 & 103 & 102 & 101 \\ 
+\hline
+1 &\texttt{0x20002} & 1 & 108 & 107 & 106 & 105 \\ 
+\hline
+2 &\texttt{0x20002} & 1 & 112 & 111 & 110 & 109 \\ 
+\hline
+3 &\texttt{0x20002} & 1 & 116 & 115 & 114 & 113 \\ 
+\hline
+4 &\texttt{0x20002} & 1 & 120 & 119 & 118 & 117 \\ 
+\hline
+5&&0&&&& \\
+\hline
+6&&0&&&& \\
+\hline
+7&&0&&&& \\
+\hline
+\end{tabular}
+\caption{Etat du cache de données}
+\endgroup
+\end{table}
+
+
+\subsection{Question E3}
+
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{| l | l | p{12cm} |}
+
+\hline
+Transition & Expression booleenne & Signification \\
+\hline
+\hline
+C
+&
+$\overline{\texttt{DREQ}}$ + ($\overline{\texttt{WRITE}}$ . $\overline{\texttt{DMISS}}$)
+&
+Si le processeur ne demande rien ou s'il demande à lire quelque chose qui est bien
+dans le cache, alors il n'y a pas miss.
+\\
+\hline
+
+A
+&
+\texttt{DREQ} . $\overline{\texttt{WRITE}}$ . \texttt{DMISS}  . \texttt{DUNC}  
+&
+Le processeur demande à lire une donnée non cachable, cela a (nécéssairement) entrainé
+un miss.
+\\
+\hline
+
+B
+&
+\texttt{DREQ} . $\overline{\texttt{WRITE}}$ . \texttt{DMISS} . $\overline{\texttt{DUNC}}$
+&
+Le processeur demande à lire une donnée cachable mais celle-ci n'est pas dans le cache.
+\\
+
+\hline
+\hline
+D
+&
+\texttt{DREQ}  . \texttt{WRITE}  . $\overline{\texttt{DMISS}}$
+&
+Le processeur demande à écrire à une adresse présente dans le cache, l'automate
+passe à l'état de mise à jour du cache
+\\
+\hline
+
+E
+&
+\texttt{DREQ}  . \texttt{WRITE}  . \texttt{DMISS}
+&
+Le processeur demande à écrire à une adresse absente du cache, l'automate
+n'a pas à mettre à jour le cache, il passe directement à l'état où il poste
+cette requete dans le TEP. 
+\\
+
+\hline
+P
+&
+1
+&
+L'automate a fini de mettre à jour le cache suite à une demande d'écriture,
+il passe donc à l'état où il poste cette requête dans le TEP.
+\\
+
+
+\hline
+\hline
+I
+&
+1
+&
+\\
+\hline
+
+F
+&
+\texttt{VALID}  + $\overline{\texttt{ERROR}}$
+&
+L'automate a recu une réponse sans erreur de la part de PIBUS\_FSM,
+il passe à la mise à jour du cache.
+\\
+\hline
+
+G
+&
+\texttt{VALID}  +\texttt{ERROR}  
+&
+L'automate a recu une réponse d'erreur de la part de PIBUS\_FSM,
+il passe à l'état d'erreur.
+\\
+\hline
+
+H
+&
+ $\overline{\texttt{VALID}}$
+&
+PIBUS\_FSM n'a toujours pas donné sa réponse, l'automate continue d'attendre.
+\\
+\hline
+
+N
+&
+1
+&
+\\
+
+\hline
+\hline
+
+J
+&
+ $\overline{\texttt{VALID}}$
+&
+PIBUS\_FSM n'a toujours pas donné sa réponse, l'automate continue d'attendre.
+\\
+\hline
+
+K
+&
+\texttt{VALID}  +\texttt{ERROR}  
+&
+L'automate a recu une réponse d'erreur de la part de PIBUS\_FSM,
+il passe à l'état d'erreur.
+\\
+\hline
+
+L
+&
+\texttt{VALID}  + $\overline{\texttt{ERROR}}$
+&
+L'automate a recu une réponse sans erreur de la part de PIBUS\_FSM,
+il passe à l'état de redirection de la donnée vers le processeur.
+\\
+\hline
+
+M
+&
+1
+&
+\\
+\hline
+
+\end{tabular}
+\caption{Transitions de l'automate}
+\endgroup
+\end{table}
+
+
+\section{Accès au PIBUS}
+
+
+F1]
+Supposons que le processeur fasse une demande de lecture alors qu'il y a des
+requêtes d'écriture dans le TEP. Pour peu que la lecture demandée concerne la
+même adresse qu'une écriture postée, répondre à la demande de lecture en premier
+entrainerait une inconsistence mémoire, la donnée renvoyée au processeur serait
+obsolète. Une manière de remédier à cela est de comparer les adresses des
+requêtes d'écritures de la TEP avec l'adresse de la lecture demandée, mais cela
+apporte des complication en terme de conception.
+
+Une autre solution, plus
+simple mais plus radicale, consiste à toujours effectuer toutes les écritures
+dans le TEP avant d'effectuer quelconque lecture. De cette manière, nous sommes
+assurés que la consistence mémoire est respectée, toutes les données renvoyées
+au processeur seront bien à jour. C'est la solution retenue ici, les écritures
+sont donc toujours prioritaires.
+
+L'inconvénient est que si le TEP est rempli, une demande de lecture entrainera
+beaucoup de cycles de gel car la demande sera satisfaite qu'une fois que TOUTES
+les écritures du TEP auront été effectuées, et tant que la lecture n'est pas
+terminée le processeur reste gelé. Le processeur gèlera donc le temps
+d'effectuer les N écritures postées plus la lecture en question.
+
+F2]
+Le mécanisme utlisé par les automates clients pour transmettre une requête
+à l'automate serveur est le mécanisme de tampon protégé par une bascule RS,
+c'est le mécanisme le plus simple et le plus utilisé pour la communication
+entre automates.
+
+Ce mécanisme consiste en un registre tampon, ici ADDR de 28 bits
+(et non pas 32 car les adresses fournies sont nécéssairement alignées en
+mémoire, et étant donné que les lignes de caches font $2^4$ octets, les 4 LSB
+des adresses sont nuls), c'est l'adresse fournie par le client au serveur.
+La deuxième partie du mécanisme est la bascule RS (ici REQ) qui est un automate
+à deux états indiquant si une requête est en suspens et dans le même temps,
+détermine qui a la parole (client ou serveur).
+
+Lorsque REQ est à 0, aucune requête n'est en suspens, le client a la parole et
+la prendra lorsqu'il aura une requête à soumettre, auquel cas il peut mettre
+REQ à 1. Le serveur, quant à lui, ne peut pas modifier REQ.
+
+Lorsque REQ est à 1, une requête est en cours de traitement, le serveur a la
+parole et la prendra lorsqu'il aura satisfait la requête, auquel cas il mettra
+REQ à 0. Le client, quand à lui, ne peut pas modifier REQ.
+
+
+Pour transmettre la réponse du serveur aux clients, le même mécanisme est
+employé. Le signal en sortie de la bascule RS est IRSP et vaut 1 lorsqu'une
+réponse du serveur est disponible et attent d'être récupérée par le client,
+c'est au client de remettre IRSP à 0 lorsqu'il récupère la réponse.
+IRSP vaut 0 lorsqu'aucune réponse n'est disponible, c'est au serveur de mettre
+à 1 lorsqu'il en délivrera une.
+
+F4]
+
+
+G1 ]
+Au cycle 10, le processeur recoit via l'interface IRSP la premiere instruction
+a executer (l'instruction lui sp 0x200 a l'adresse 0xbcf00000, c'est la
+premiere instruction du code de boot au debut du segment RESET).
+C'est au cycle suivant qu'il commence a l'executer.
+
+Au cycle 0 le processeur demande l'instruction a 0xbcf00000 et le cache
+d'instructions fait miss, cette instruction sera disponible via l'interface IRSP
+qu'a la fin du cycle 10 alors qu'elle aurait ete disponible a la fin du cycle 0
+s'il y avait eu hit. Il y a donc 10 cycles de gel (cycles 1 a 10) causes par
+le miss compulsif.
+
+
+
+%===============================================================================
+%=========================  End of the Document  ===============================
+%===============================================================================
+
+\end{document}
+
