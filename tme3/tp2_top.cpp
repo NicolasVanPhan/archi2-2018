@@ -76,13 +76,13 @@ int _main (int argc, char *argv[])
     char    app_path[256]       = "soft/app.bin";  	// pathname for the application binary code
     bool    debug_ok            = false;            	// debug activated
     size_t  from_cycle          = 0;                	// debug start cycle
-    size_t  ram_latency		= 0;		    	// ram latency
+    size_t  ram_latency		= 2;		    	// ram latency
     bool    snoop_active	= false;	    	// snoop activation
     size_t  icache_ways     	= 1;  	                // instruction cache number of ways
-    size_t  icache_sets     	= 1;                    // instruction cache number of sets
+    size_t  icache_sets     	= 8;                    // instruction cache number of sets
     size_t  icache_words    	= 4;              	// instruction cache number of words per line
     size_t  dcache_ways     	= 1;              	// data cache number of ways
-    size_t  dcache_sets     	= 1;             	// data cache number of sets
+    size_t  dcache_sets     	= 8;             	// data cache number of sets
     size_t  dcache_words    	= 4;              	// data cache number of words per line
     size_t  wbuf_depth      	= 8;              	// write buffer depth
     bool    stats_ok		= false;	    	// statistics activation
