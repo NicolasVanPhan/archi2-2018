@@ -373,7 +373,8 @@ M
 \subsection{Question D6}
 
 L'activation du signal RESETN force cet automate anisi que les deux autres
-à l'état IDLE.
+à l'état IDLE. De plus, l'activation du signal RESETN entraine l'invalidation
+de 100% des caches.
 
 
 \section{Fonctionnement du cache de donnees}
@@ -629,11 +630,24 @@ M
 \endgroup
 \end{table}
 
+\subsection{Question E4}
+
+La différence entre les transition de sortie de IDLE et WRITE\_REQ est la
+condition de rebouclage vers le même état. A l'état WRITEREQ, l'automate reste
+dans ce même état tant que le buffer d'écriture est plein. En effet, l'automate
+a une écriture a poster mais le TEP est pleine, et à cause de la politique
+write-through, cette écriture doit être répercutée immédiatement dans la RAM,
+donc la requête d'écriture doit absolument être postée avant que le processeur
+passe à l'exécutions des instructions suivantes. L'automate reste donc dans
+l'état WRITEREQ et le processeur gèle jusqu'à ce qu'une place se libère dans
+le TEP.
+
 
 \section{Accès au PIBUS}
 
 
-F1]
+\subsection{Question F1}
+
 Supposons que le processeur fasse une demande de lecture alors qu'il y a des
 requêtes d'écriture dans le TEP. Pour peu que la lecture demandée concerne la
 même adresse qu'une écriture postée, répondre à la demande de lecture en premier
@@ -655,7 +669,8 @@ les écritures du TEP auront été effectuées, et tant que la lecture n'est pas
 terminée le processeur reste gelé. Le processeur gèlera donc le temps
 d'effectuer les N écritures postées plus la lecture en question.
 
-F2]
+\subsection{Question F2}
+
 Le mécanisme utlisé par les automates clients pour transmettre une requête
 à l'automate serveur est le mécanisme de tampon protégé par une bascule RS,
 c'est le mécanisme le plus simple et le plus utilisé pour la communication
@@ -685,20 +700,184 @@ c'est au client de remettre IRSP à 0 lorsqu'il récupère la réponse.
 IRSP vaut 0 lorsqu'aucune réponse n'est disponible, c'est au serveur de mettre
 à 1 lorsqu'il en délivrera une.
 
+\subsection{Question F3}
+
+Les automates ICACHEFSM et DCACHEFSM n'ont pas besoin de savoir qu'une écriture
+s'est terminée car s'ils veulent effectuer une lecture, leurs requêtes au
+serveur resteront en attente tant que toutes les écritures n'auront pas été
+effectuées.
+
 F4]
 
+\begin{table}[H]
+\centering
+\begingroup
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{| l | l |}
 
-G1 ]
-Au cycle 10, le processeur recoit via l'interface IRSP la premiere instruction
-a executer (l'instruction lui sp 0x200 a l'adresse 0xbcf00000, c'est la
-premiere instruction du code de boot au debut du segment RESET).
-C'est au cycle suivant qu'il commence a l'executer.
+\hline
+Transision & Expression booleenne \\
+
+\hline
+Z
+&
+\texttt{
+ROK . $\overline{\texttt{SC}}$ . $\overline{\texttt{IUNC}}$
+. $\overline{\texttt{IMISS}}$ . $\overline{\texttt{DUNC}}$ . $\overline{\texttt{DMISS}}$
+} \\
+
+\hline
+
+
+X
+&
+\texttt{
+$\overline{\texttt{ROK}}$ + SC
+} \\
+\hline
+
+B'
+&
+\texttt{
+$\overline{\texttt{GNT}}$
+} \\
+\hline
+
+B
+&
+\texttt{
+GNT
+} \\
+\hline
+
+C
+&
+\texttt{
+1
+} \\
+\hline
+
+D'
+&
+\texttt{
+$\overline{\texttt{WAIT}}$
+} \\
+\hline
+
+D
+&
+\texttt{
+WAIT
+} \\
+\hline
+
+
+Y
+&
+\texttt{
+ROK . $\overline{\texttt{SC}}$ . (IUNC + IMISS + DUNC + DMISS)
+} \\
+\hline
+
+E'
+&
+\texttt{
+$\overline{\texttt{GNT}}$
+} \\
+\hline
+
+E
+&
+\texttt{
+GNT
+} \\
+\hline
+
+F
+&
+\texttt{
+LAST
+} \\
+\hline
+
+F'
+&
+\texttt{
+$\overline{\texttt{LAST}}$
+} \\
+\hline
+
+G
+&
+\texttt{
+LAST
+} \\
+\hline
+
+G'
+&
+\texttt{
+$\overline{\texttt{LAST}}$
+} \\
+\hline
+
+H'
+&
+\texttt{
+$\overline{\texttt{WAIT}}$
+} \\
+\hline
+
+H
+&
+\texttt{
+WAIT
+} \\
+\hline
+
+\end{tabular}
+\caption{Transitions de l'automate}
+\endgroup
+\end{table}
+
+
+\section{Expérimentation par simulation}
+
+\subsection{Question G1}
+
+Au cycle 10, le processeur recoit via l'interface IRSP la première instruction
+à exécuter (l'instruction lui sp 0x200 a l'adresse 0xbcf00000, c'est la
+première instruction du code de boot au debut du segment RESET).
+C'est au cycle suivant qu'il commence a l'exécuter.
 
 Au cycle 0 le processeur demande l'instruction a 0xbcf00000 et le cache
 d'instructions fait miss, cette instruction sera disponible via l'interface IRSP
-qu'a la fin du cycle 10 alors qu'elle aurait ete disponible a la fin du cycle 0
-s'il y avait eu hit. Il y a donc 10 cycles de gel (cycles 1 a 10) causes par
+qu'à la fin du cycle 10 alors qu'elle aurait été disponible a la fin du cycle 0
+s'il y avait eu hit. Il y a donc 10 cycles de gel (cycles 1 a 10) causés par
 le miss compulsif.
+
+\subsection{Question G2}
+
+Au cycle 47, le processeur demande la première instruction du main
+(à l'adresse 0x00400000),
+le cache fait miss. C'est au cycle 57 que cette instruction commence à être
+exécutée,
+nous retrouvons bien les 10 cycles d'attentes calcules precedemment.
+
+\subsection{Question G3}
+
+Les instructions lw mettent entrainent chacune 12 cycles de gel à cause des
+MISS qu'elles entrainent.
+
+\subsection{Question G4}
+
+Pour les itérations autres que la première, le coût du miss du premier lw
+est plus important car au moment du miss, il y a une requête postée dans le 
+TEP (venant du sw de l'itération précédente) et le controlleur de cache
+effectue d'abord toutes les écritures dans le TEP avant d'effectuer une lecture.
+Le miss du premier lw entraine donc des cycles de gel le temps d'effectuer
+une écriture en plus d'une lecture.
 
 
 
