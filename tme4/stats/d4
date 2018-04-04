@@ -1,0 +1,299 @@
+
+********************************************************
+******        tp2_top                             ******
+********************************************************
+
+
+Instanciation of PibuBcu : bcu
+    nb_master = 1
+    nb_target = 3
+    time_out  = 100
+
+Instanciation of PibusMips32Xcache : proc
+    proc_id      = 0
+    icache_ways  = 1
+    icache_sets  = 4
+    icache_words = 8
+    dcache_ways  = 4
+    dcache_sets  = 256
+    dcache_words = 16
+    wbuf_depth   = 8
+    snoop        = 0
+
+Instanciation of PibusSimpleRam : rom
+    latency = 0
+    segment seg_reset | base = 0xbfc00000 | size = 0x1000
+
+Instanciation of PibusSimpleRam : ram
+    latency = 2
+    segment seg_kcode | base = 0x80000000 | size = 0x4000
+    segment seg_kdata | base = 0x82000000 | size = 0x10000
+    segment seg_kunc | base = 0x81000000 | size = 0x1000
+    segment seg_code | base = 0x400000 | size = 0x4000
+    segment seg_data | base = 0x1000000 | size = 0x4000
+    segment seg_stack | base = 0x2000000 | size = 0x4000
+
+Instanciation of PibusMultiTty : tty
+    ntty = 1
+    segment seg_tty | base = 0x90000000 | size = 0x10
+
+bcu : connected
+rom : connected
+ram : connected
+tty : connected
+proc : connected
+
+Loading at 0xbfc00000 size 0x1000: seg_reset 
+Loading at 0x80000000 size 0x4000: seg_kcode 
+Loading at 0x82000000 size 0x10000: seg_kdata 
+Loading at 0x81000000 size 0x1000: seg_kunc 
+Loading at 0x400000 size 0x4000: seg_code 
+Loading at 0x1000000 size 0x4000: seg_data 
+Loading at 0x2000000 size 0x4000: nothing
+Loading at 0xbfc00000 size 0x1000: seg_reset 
+Loading at 0x80000000 size 0x4000: seg_kcode 
+Loading at 0x82000000 size 0x10000: seg_kdata 
+Loading at 0x81000000 size 0x1000: seg_kunc 
+Loading at 0x400000 size 0x4000: seg_code 
+Loading at 0x1000000 size 0x4000: seg_data 
+Loading at 0x2000000 size 0x4000: nothing
+*** proc at cycle 1
+- INSTRUCTIONS       = 0
+- CPI                = inf
+- CACHED READ RATE   = -nan
+- UNCACHED READ RATE = -nan
+- WRITE RATE         = -nan
+- IMISS RATE         = inf
+- DMISS RATE         = -nan
+- IMISS COST         = 1
+- DMISS COST         = -nan
+- UNC COST           = -nan
+- WRITE COST         = -nan
+*** proc at cycle 51
+- INSTRUCTIONS       = 7
+- CPI                = 7.28571
+- CACHED READ RATE   = 0.285714
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0
+- IMISS RATE         = 0.285714
+- DMISS RATE         = 0.5
+- IMISS COST         = 21.5
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = -nan
+*** proc at cycle 101
+- INSTRUCTIONS       = 12
+- CPI                = 8.41667
+- CACHED READ RATE   = 0.166667
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.25
+- IMISS RATE         = 0.333333
+- DMISS RATE         = 0.5
+- IMISS COST         = 21.5
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 151
+- INSTRUCTIONS       = 15
+- CPI                = 10.0667
+- CACHED READ RATE   = 0.2
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.266667
+- IMISS RATE         = 0.333333
+- DMISS RATE         = 0.666667
+- IMISS COST         = 23.6
+- DMISS COST         = 19
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 201
+- INSTRUCTIONS       = 21
+- CPI                = 9.57143
+- CACHED READ RATE   = 0.285714
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.190476
+- IMISS RATE         = 0.333333
+- DMISS RATE         = 0.333333
+- IMISS COST         = 21.2857
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 251
+- INSTRUCTIONS       = 30
+- CPI                = 8.36667
+- CACHED READ RATE   = 0.266667
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.266667
+- IMISS RATE         = 0.3
+- DMISS RATE         = 0.25
+- IMISS COST         = 20.5556
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 301
+- INSTRUCTIONS       = 35
+- CPI                = 8.6
+- CACHED READ RATE   = 0.314286
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.228571
+- IMISS RATE         = 0.314286
+- DMISS RATE         = 0.181818
+- IMISS COST         = 20.7273
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 351
+- INSTRUCTIONS       = 44
+- CPI                = 7.97727
+- CACHED READ RATE   = 0.295455
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.204545
+- IMISS RATE         = 0.295455
+- DMISS RATE         = 0.153846
+- IMISS COST         = 20.3077
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 401
+- INSTRUCTIONS       = 55
+- CPI                = 7.29091
+- CACHED READ RATE   = 0.254545
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.272727
+- IMISS RATE         = 0.272727
+- DMISS RATE         = 0.142857
+- IMISS COST         = 19.9333
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 451
+- INSTRUCTIONS       = 58
+- CPI                = 7.77586
+- CACHED READ RATE   = 0.241379
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.275862
+- IMISS RATE         = 0.275862
+- DMISS RATE         = 0.142857
+- IMISS COST         = 21.5625
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 501
+- INSTRUCTIONS       = 64
+- CPI                = 7.82812
+- CACHED READ RATE   = 0.265625
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.265625
+- IMISS RATE         = 0.265625
+- DMISS RATE         = 0.176471
+- IMISS COST         = 21.2941
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 551
+- INSTRUCTIONS       = 69
+- CPI                = 7.98551
+- CACHED READ RATE   = 0.304348
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.246377
+- IMISS RATE         = 0.26087
+- DMISS RATE         = 0.190476
+- IMISS COST         = 21.1111
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 601
+- INSTRUCTIONS       = 104
+- CPI                = 5.77885
+- CACHED READ RATE   = 0.355769
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.182692
+- IMISS RATE         = 0.173077
+- DMISS RATE         = 0.108108
+- IMISS COST         = 21.2778
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 651
+- INSTRUCTIONS       = 140
+- CPI                = 4.65
+- CACHED READ RATE   = 0.378571
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.15
+- IMISS RATE         = 0.135714
+- DMISS RATE         = 0.0754717
+- IMISS COST         = 20.3684
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 701
+- INSTRUCTIONS       = 148
+- CPI                = 4.73649
+- CACHED READ RATE   = 0.371622
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.148649
+- IMISS RATE         = 0.141892
+- DMISS RATE         = 0.0727273
+- IMISS COST         = 20.3333
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 751
+- INSTRUCTIONS       = 154
+- CPI                = 4.87662
+- CACHED READ RATE   = 0.357143
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.175325
+- IMISS RATE         = 0.142857
+- DMISS RATE         = 0.0727273
+- IMISS COST         = 21.3636
+- DMISS COST         = 24
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 801
+- INSTRUCTIONS       = 160
+- CPI                = 5.00625
+- CACHED READ RATE   = 0.38125
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.175
+- IMISS RATE         = 0.14375
+- DMISS RATE         = 0.0819672
+- IMISS COST         = 20.9565
+- DMISS COST         = 25.2
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 851
+- INSTRUCTIONS       = 167
+- CPI                = 5.09581
+- CACHED READ RATE   = 0.377246
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.167665
+- IMISS RATE         = 0.143713
+- DMISS RATE         = 0.0952381
+- IMISS COST         = 20.7917
+- DMISS COST         = 25
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 901
+- INSTRUCTIONS       = 178
+- CPI                = 5.0618
+- CACHED READ RATE   = 0.359551
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.168539
+- IMISS RATE         = 0.140449
+- DMISS RATE         = 0.109375
+- IMISS COST         = 21.36
+- DMISS COST         = 21.8571
+- UNC COST           = -nan
+- WRITE COST         = 0
+*** proc at cycle 951
+- INSTRUCTIONS       = 181
+- CPI                = 5.25414
+- CACHED READ RATE   = 0.359116
+- UNCACHED READ RATE = 0
+- WRITE RATE         = 0.165746
+- IMISS RATE         = 0.149171
+- DMISS RATE         = 0.107692
+- IMISS COST         = 20.6667
+- DMISS COST         = 24.8571
+- UNC COST           = -nan
+- WRITE COST         = 0

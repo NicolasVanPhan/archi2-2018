@@ -1,0 +1,54 @@
+
+Dans cette partie, nous allons mesurer le temps d'exécution de notre
+application de test de performances sur un système mémoire presque parfait.
+Ces mesures serviront "d'étalon" auquels nous comparerons les mesures de
+performances sur des systèmes réels, dans différentes configurations de cache.
+
+C1 ]
+Le temps d'excution de l'application est de 76248 cycles.
+
+C2 ]
+Une problématique courante lorsque nous effectuons des mesures sur un système
+est que la mesure en elle-même ne change pas les résultats mesurés.
+Dans notre cas, si nous exécutons certaines instructions pour mesurer la durée
+d'exécution d'une application, l'exécution même de ces instructions augmente
+la durée d'exécution totale, et change ainsi le résultat de la mesure.
+Pour éviter cela, il existe dans le modèle SystemC du composant matériel
+des registres spéciaux contenant des informations sur
+la performance du système.
+
+C3 ]
+
+Le taux de miss sur le cache d'instructions est de l'ordre du dizième pendant
+les 500 premiers cycles, puis descend à un centième pour les cycles suivants.
+Quant au taux de miss sur le cache de données, il vaut 1 pour les premiers
+cycles, puis descend aussi à 0.1.
+
+C4 ]
+A chaque fois qu'une instruction est exécutée, la variable c_total_inst
+est incrémentée. D'autre part, à chaque fois qu'une requête sur le cache
+d'instructions fait miss, la variable c_imiss_count est incrémentée.
+Puis le taux de miss IRATE affiché est le rapport entre le nombre de requêtes
+d'instructions qui ont fait miss et le nombre total de requêtes d'instructions.
+
+Pour le cache de données, la variable c_dmiss_count compte le nombre de
+requêtes de données cachables qui ont entrainées un miss, la variable
+c_dread_count compte le nombre de requêtes de lectures sur le cache, et la
+variable c_unc_count compte le nombre de requêtes de lectures de données non
+cachables.
+
+Le nombre de lectures cachables est donc le nombre de lectures totales moins
+le nombre de lectures non cachables (c_dread_count - c_unc_count).
+Enfin, le taux de MISS pour les données est le nombre de lectures cachables
+qui font miss divisé par le nombre de lectures cachables totales, cest à dire :
+
+c_dmiss_count / (c_dread_count - c_unc_count)
+
+D -- Influence de la capacité du cache d'instructions
+
+Nous allons commencer le test de peformance de systèmes plus réalistes,
+et allons étudier l'influence d'un premier paramètre du cache : sa capacité.
+
+D1 ]
+
+
