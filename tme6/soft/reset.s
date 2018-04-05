@@ -17,6 +17,8 @@
 
 	.extern	seg_stack_base
 	.extern	seg_data_base
+	.extern	seg_icu_base
+	.extern	seg_timer_base
 
 	.func	reset
 	.type   reset, %function
@@ -31,14 +33,35 @@ reset:
 
 proc0:
         # initialises interrupt vector entries for PROC[0]
+	la	$26,	_interrupt_vector	# $26 <= &_interrupt_vector[0]
+	addi	$26,	$26,	0x8		# $26 <= &_interrupt_vector[2]
+	la	$27,	_isr_timer
+	sw	$27,	($26)			# _itrpt_vector[2] = isr_timer
 
         #initializes the ICU[0] MASK register
+	la	$26,	seg_icu_base
+	addi	$26,	$26,	0x00		# access output channel 0
+	addi	$26,	$26,	0x08		# access ICU_MASK_SET
+	li	$27,	0x4			# enable channel 2 (TIMER 0)
+	
+	sw	$27,	($26)
 
         # initializes TIMER[0] PERIOD and RUNNING registers
+	la	$26,	seg_timer_base
+	addi	$26,	$26,	0x00		# access timer 0
+	addi	$26,	$26,	0x8		# access TIMER_PERIOD
+	li	$27,	50000			# set period
+	sw	$27,	($26)
 
-        # initializes stack pointer for PROC[0]
+	la	$26,	seg_timer_base
+	addi	$26,	$26,	0x00		# access timer 0
+	addi	$26,	$26,	0x4		# access TIMER_RUNNING
+	li	$27,	0x1			# set timer running
+	sw	$27,	($26)
+
+	# initializes stack pointer for PROC[0]
 	la	$29,	seg_stack_base
-        li	$27,	0x10000			# stack size = 64K
+        li	$27,	50000			# stack size = 64K
 	addu	$29,	$29,	$27    		# $29 <= seg_stack_base + 64K
 
         # initializes SR register for PROC[0]
@@ -53,12 +76,33 @@ proc0:
 
 proc1:
         # initialises interrupt vector entries for PROC[1]
+	la	$26,	_interrupt_vector	# $26 <= &_interrupt_vector[0]
+	addi	$26,	$26,	0x10		# $26 <= &_interrupt_vector[4]
+	la	$27,	_isr_timer
+	sw	$27,	($26)			# _itrpt_vector[2] = isr_timer
 
         #initializes the ICU[1] MASK register
+	la	$26,	seg_icu_base
+	addi	$26,	$26,	0x20		# access output channel 1
+	addi	$26,	$26,	0x08		# access ICU_MASK_SET
+	li	$27,	0x10			# enable channel 4 (TIMER 1)
+	
+	sw	$27,	($26)
 
         # initializes TIMER[1] PERIOD and RUNNING registers
+	la	$26,	seg_timer_base
+	addi	$26,	$26,	0x10		# access timer 1
+	addi	$26,	$26,	0x8		# access TIMER_PERIOD
+	li	$27,	100000			# set period
+	sw	$27,	($26)
 
-        # initializes stack pointer for PROC[1]
+	la	$26,	seg_timer_base
+	addi	$26,	$26,	0x10		# access timer 1
+	addi	$26,	$26,	0x4		# access TIMER_RUNNING
+	li	$27,	0x1			# set timer running
+	sw	$27,	($26)
+
+	# initializes stack pointer for PROC[1]
 	la	$29,	seg_stack_base
         li	$27,	0x10000			# stack size = 64K
 	addu	$29,	$29,	$27    		# $29 <= seg_stack_base + 64K
