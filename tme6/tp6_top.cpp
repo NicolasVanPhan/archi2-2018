@@ -33,10 +33,10 @@
 #define IOC_LATENCY	1000	// disk latency
 #define RAM_LATENCY	0	// ram latency
 #define ICACHE_WAYS	4       // instruction cache number of ways
-#define ICACHE_SETS	512     // instruction cache number of sets
+#define ICACHE_SETS	32      // instruction cache number of sets
 #define ICACHE_WORDS	8       // instruction cache number of words per line
 #define DCACHE_WAYS	4       // data cache number of ways
-#define DCACHE_SETS	512     // data cache number of sets
+#define DCACHE_SETS	32      // data cache number of sets
 #define DCACHE_WORDS	8       // data cache number of words per line
 #define WBUF_DEPTH	8       // cache write buffer depth
 #define SNOOP		false	// cache snoop activation
