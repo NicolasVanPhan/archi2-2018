@@ -38,12 +38,19 @@ proc0:
 	la	$27,	_isr_timer
 	sw	$27,	($26)			# _itrpt_vector[2] = isr_timer
 
+	la	$26,	_interrupt_vector	# $26 <= &_interrupt_vector[0]
+	addi	$26,	$26,	0xc		# $26 <= &_interrupt_vector[3]
+	la	$27,	_isr_tty_get
+	sw	$27,	($26)			# _itrpt_vector[3] = isr_tty_get
+
+
         #initializes the ICU[0] MASK register
 	la	$26,	seg_icu_base
 	addi	$26,	$26,	0x00		# access output channel 0
 	addi	$26,	$26,	0x08		# access ICU_MASK_SET
 	li	$27,	0x4			# enable channel 2 (TIMER 0)
-	
+	sw	$27,	($26)
+	li	$27,	0x8			# enable channel 3 (TTY 0)
 	sw	$27,	($26)
 
         # initializes TIMER[0] PERIOD and RUNNING registers
@@ -57,7 +64,7 @@ proc0:
 	addi	$26,	$26,	0x00		# access timer 0
 	addi	$26,	$26,	0x4		# access TIMER_RUNNING
 	li	$27,	0x1			# set timer running
-	sw	$27,	($26)
+	#sw	$27,	($26)
 
 	# initializes stack pointer for PROC[0]
 	la	$29,	seg_stack_base
@@ -79,14 +86,20 @@ proc1:
 	la	$26,	_interrupt_vector	# $26 <= &_interrupt_vector[0]
 	addi	$26,	$26,	0x10		# $26 <= &_interrupt_vector[4]
 	la	$27,	_isr_timer
-	sw	$27,	($26)			# _itrpt_vector[2] = isr_timer
+	sw	$27,	($26)			# _itrpt_vector[4] = isr_timer
+
+	la	$26,	_interrupt_vector	# $26 <= &_interrupt_vector[0]
+	addi	$26,	$26,	0x14		# $26 <= &_interrupt_vector[5]
+	la	$27,	_isr_tty_get
+	sw	$27,	($26)			# _itrpt_vector[5] = isr_tty_get
 
         #initializes the ICU[1] MASK register
 	la	$26,	seg_icu_base
 	addi	$26,	$26,	0x20		# access output channel 1
 	addi	$26,	$26,	0x08		# access ICU_MASK_SET
 	li	$27,	0x10			# enable channel 4 (TIMER 1)
-	
+	sw	$27,	($26)
+	li	$27,	0x20			# enable channel 5 (TTY 1)
 	sw	$27,	($26)
 
         # initializes TIMER[1] PERIOD and RUNNING registers
@@ -100,7 +113,7 @@ proc1:
 	addi	$26,	$26,	0x10		# access timer 1
 	addi	$26,	$26,	0x4		# access TIMER_RUNNING
 	li	$27,	0x1			# set timer running
-	sw	$27,	($26)
+	#sw	$27,	($26)
 
 	# initializes stack pointer for PROC[1]
 	la	$29,	seg_stack_base
