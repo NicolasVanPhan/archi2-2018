@@ -27,8 +27,8 @@
 // These values can be modified on the command Line
 
 #define NPROCS		4	// number of processors
-#define FB_NPIXEL	256	// Frame buffer width
-#define FB_NLINE	256	// Frame buffer heigth
+#define FB_NPIXEL	128	// Frame buffer width
+#define FB_NLINE	128	// Frame buffer heigth
 #define BLOCK_SIZE	512	// IOC block size
 #define IOC_LATENCY	1000	// disk latency
 #define RAM_LATENCY	0	// ram latency
@@ -39,7 +39,7 @@
 #define DCACHE_SETS	32      // data cache number of sets
 #define DCACHE_WORDS	4       // data cache number of words per line
 #define WBUF_DEPTH	8       // cache write buffer depth
-#define SNOOP		false	// cache snoop activation
+#define SNOOP		true	// cache snoop activation
 #define	DMA_BURST	16	// number of words in a DMA burst
 
 #include <systemc.h>

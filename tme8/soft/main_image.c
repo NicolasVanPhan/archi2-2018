@@ -38,8 +38,8 @@ __attribute__ ((constructor)) void main()
         tty_printf("L'index du processeur %d est plus grand que le nombre de processeurs\n", pid);
     }
 
-    npixels = NB_PIXELS*NB_LINES/nprocs;
-    nblocks = npixels/BLOCK_SIZE;
+    npixels = NB_PIXELS*NB_LINES/nprocs; //nb de pixels a traitrer pour un proc
+    nblocks = npixels/BLOCK_SIZE;        // nb de blocs a traiter pour un proc
 
     // main loop
     while(image < 20)
@@ -47,7 +47,7 @@ __attribute__ ((constructor)) void main()
         tty_printf("\n *** image %d au cycle : %d *** \n", image, proctime());
 
         /* Phase 1 : lecture image sur le disque et transfert vers buf_in */
-        if ( ioc_read(TO BE COMPLETED) )
+        if ( ioc_read(base + pid*nblocks, buf_in + pid*npixels, nblocks) )
         {
             tty_printf("\n!!! echec ioc_read au cycle : %d !!!\n", proctime()); 
             exit();
@@ -68,7 +68,7 @@ __attribute__ ((constructor)) void main()
         tty_printf("- filtrage termine au cycle = %d \n",proctime());
 
         /* Phase 3 : transfert de buf_out vers le frame buffer */
-        if ( fb_sync_write(TO BE COMPLETED) )
+        if ( fb_sync_write(pid*npixels, buf_out + pid*npixels, npixels) )
         { 
             tty_printf("\n!!! echec fb_write au cycle : %d !!!\n", proctime()); 
             exit();
