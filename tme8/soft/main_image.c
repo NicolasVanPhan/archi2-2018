@@ -25,6 +25,9 @@ __attribute__ ((constructor)) void main()
     int		npixels;		// number of pixels per processor		
     int		nblocks; 		// number of blocks per processor
 
+    for (i = 0; i < NB_LINES*NB_PIXELS; i++)
+	    buf_in[i] = 200;
+    
     if ( (nprocs != 1) &&
          (nprocs != 2) &&
          (nprocs != 4) )
