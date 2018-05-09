@@ -1,6 +1,6 @@
 #include "stdio.h"
 
-#define DEPTH		4
+#define DEPTH		6
 #define NMAX 		50
 
 /******************/
@@ -18,10 +18,12 @@ typedef struct fifo
     int	    ptw;
     int	    sts;
     int     depth;
+	int		id;
     lock_t  lock;
 } fifo_t;
 
-volatile fifo_t fifo = { {} , 0 , 0 , 0 , DEPTH };
+volatile fifo_t fifo1 = { {} , 0 , 0 , 0 , DEPTH , 0 };
+volatile fifo_t fifo2 = { {} , 0 , 0 , 0 , DEPTH , 1 };
 
 /************************************************/
 unsigned int atomic_increment( unsigned int*  ptr,
@@ -63,6 +65,8 @@ void lock_acquire( lock_t* plock )
         :
         : "r" (pcurrent) , "r" (ticket )
         : "$10" , "$11" );
+	//if (ticket < 500)
+		//tty_printf("Proc %d got ticket %d:%d\n", procid(), *((int*)((char*)plock - 4)), ticket);
 }
 
 /*******************************/
@@ -92,11 +96,13 @@ void fifo_write(fifo_t* fifo, int* val)
 			fifo->buf[fifo->ptw] = *val;
 			/* Increment FIFO write pointer */
 			(fifo->ptw)++;
+			__sync_synchronize();
 			/* The FIFO is circular */
 			if (fifo->ptw == fifo->depth)
 				fifo->ptw = 0;	
 			/* Update sts */
 			(fifo->sts)++;
+			__sync_synchronize();
 			/* Release the lock */
             lock_release( (lock_t*)(&fifo->lock) );
 			done = 1;
@@ -122,11 +128,13 @@ void fifo_read(fifo_t* fifo, int* val)
 			*val = fifo->buf[fifo->ptr];
 			/* Increment FIFO read pointer */
 			(fifo->ptr)++;
+			__sync_synchronize();
 			/* The FIFO is circular */
 			if (fifo->ptr == fifo->depth)
 				fifo->ptr = 0;	
 			/* Update sts */
 			(fifo->sts)--;
+			__sync_synchronize();
 			/* Release the lock */
             lock_release( (lock_t*)(&fifo->lock) );
 			done = 1;
@@ -148,7 +156,7 @@ __attribute__ ((constructor)) void producer()
     { 
         tempo = rand()>>6;
         val = n;
-        fifo_write((fifo_t*)&fifo, &val);
+        fifo_write((fifo_t*)&fifo1, &val);
         for(x = 0 ; x < tempo ; x++) asm volatile ("");
         tty_printf("transmitted value : %d      temporisation = %d\n", val, tempo);
     }
@@ -165,19 +173,53 @@ __attribute__ ((constructor)) void consumer()
     int x;
     int tempo = 0;
     int val;
+	char	array[NMAX] = {0};
+	int		nb_errors = 0;
 
     tty_printf("*** Starting task consumer on processor %d ***\n\n", procid());
 
     for(n = 0 ; n < NMAX ; n++) 
     { 
         tempo = rand()>>6;
-        fifo_read((fifo_t*)&fifo, &val);
+        fifo_read((fifo_t*)&fifo2, &val);
         for(x = 0 ; x < tempo ; x++) asm volatile ("");
         tty_printf("received value : %d      temporisation = %d\n", val, tempo);
+		if (val >= 0 && val < NMAX) array[val]++;
     }
+
+	/* Diagnosis */
+	tty_printf("\n=== Diagnosis beginning ===\n");
+	for (n = 0; n < NMAX; n++) {
+		nb_errors++;
+		if (array[n] == 0)
+			tty_printf("[Error] Token %d was never received\n", n);
+		else if (array[n] > 1)
+			tty_printf("[Error] Token %d received %d times\n", n, array[n]);
+		else
+			nb_errors--;
+	}
+	tty_printf("=== Diagnosis terminated with %d error(s) ===\n", nb_errors);
 
     tty_printf("\n*** Completing consumer at cycle %d ***\n", proctime());
     exit();
-
 } // end consumer()
 
+/*******************************************/
+__attribute__ ((constructor)) void router()
+{
+	int	x;
+	int	tempo = 0;
+	int	val;
+
+	tty_printf("*** Starting task router on processor %d ***\n\n", procid());
+
+	while (1)
+	{
+		tty_printf("\n\n*** Loop : ***\n");
+		fifo_read((fifo_t*)&fifo1, &val);
+        tempo = rand()>>6;
+        for(x = 0 ; x < tempo ; x++) asm volatile ("");
+		fifo_write((fifo_t*)&fifo2, &val);
+		tty_printf("Routed value : %d		at %d		temporisation : %d\n", val, proctime(), tempo);
+	}
+}
