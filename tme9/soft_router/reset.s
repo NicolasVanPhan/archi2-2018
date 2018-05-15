@@ -144,7 +144,7 @@ proc3:
        	mtc0	$26,	$12			# SR <= 0x0000FF13
         # jump to main in user mode: main[0]
 	la      $26,	seg_data_base		# get jump table addr	
-        lw	$26,	8($26)			# read main[1] in jump table
+        lw	$26,	12($26)			# read main[1] in jump table
 	mtc0	$26,	$14			# write it in EPC register
 	eret
 proc4:
@@ -168,7 +168,7 @@ proc4:
        	mtc0	$26,	$12			# SR <= 0x0000FF13
         # jump to main in user mode: main[0]
 	la      $26,	seg_data_base		# get jump table addr	
-        lw	$26,	8($26)			# read main[1] in jump table
+        lw	$26,	16($26)			# read main[1] in jump table
 	mtc0	$26,	$14			# write it in EPC register
 	eret
 proc5:
@@ -192,7 +192,7 @@ proc5:
        	mtc0	$26,	$12			# SR <= 0x0000FF13
         # jump to main in user mode: main[0]
 	la      $26,	seg_data_base		# get jump table addr	
-        lw	$26,	8($26)			# read main[1] in jump table
+        lw	$26,	20($26)			# read main[1] in jump table
 	mtc0	$26,	$14			# write it in EPC register
 	eret
 
